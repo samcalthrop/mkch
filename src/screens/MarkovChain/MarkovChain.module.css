@@ -1,0 +1,19 @@
+
+.background {
+    background-color: rgba(32, 36, 40, 1);
+}
+
+.techInfo {
+    color: rgba(70, 72, 80, 1);
+    font-family: "Fira Code";
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    max-height: 50%;
+    padding-right: 5px;
+}
+
+.infoText {
+    background-color: transparent;
+}

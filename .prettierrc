@@ -1,0 +1,4 @@
+// i made this file manually
+{
+  "plugins": ["prettier-plugin-tailwindcss"]
+}
