@@ -1,0 +1,4 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = ["M4 6h3.5l1-4h3l1 4H16l1-4h3l-1.063 4H19a1 1 0 110 2h-.594l-.265 1H19a1 1 0 110 2h-1.39l-1.86 7h-3l-1.86-7H9.11l-1.86 7h-3l-1.86-7H1a1 1 0 110-2h.86l-.266-1H1a1 1 0 010-2h.063L0 2h3l1 4zm1.75 7l.5-2h-1l.5 2zm8-2l.5 2 .5-2h-1zM13 8l.25 1h2l.25-1H13zM4.75 9h2L7 8H4.5l.25 1zm4.89 0h.72l-.266-1h-.188l-.265 1z"];
+//# sourceMappingURL=won.js.map

@@ -1,0 +1,2 @@
+export default ["M10 8.546L14 2h3l-4.889 8H15a1 1 0 110 2h-3.5v1H15a1 1 0 110 2h-3.5v4h-3v-4H5a1 1 0 010-2h3.5v-1H5a1 1 0 010-2h2.889L3 2h3l4 6.546z"];
+//# sourceMappingURL=yen.js.map

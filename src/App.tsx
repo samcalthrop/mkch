@@ -1,16 +1,13 @@
-import { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import { Home } from "./screens/Home/Home";
+import { ProjectView } from "./screens/ProjectView/ProjectView";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/home/*" element={<Home />} />
+      <Route path="/" element={<ProjectView />} />
+      <Route path="/projectView/*" element={<ProjectView />} />
     </Routes>
   );
 }

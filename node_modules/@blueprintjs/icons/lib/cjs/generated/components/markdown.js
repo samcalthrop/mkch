@@ -1,0 +1,35 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Markdown = void 0;
+const tslib_1 = require("tslib");
+const jsx_runtime_1 = require("react/jsx-runtime");
+/*
+ * Copyright 2024 Palantir Technologies, Inc. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const React = tslib_1.__importStar(require("react"));
+const iconTypes_1 = require("../../iconTypes");
+const svgIconContainer_1 = require("../../svgIconContainer");
+exports.Markdown = React.forwardRef((props, ref) => {
+    const isLarge = props.size >= iconTypes_1.IconSize.LARGE;
+    const pixelGridSize = isLarge ? iconTypes_1.IconSize.LARGE : iconTypes_1.IconSize.STANDARD;
+    const translation = `${-1 * pixelGridSize / 0.05 / 2}`;
+    const style = { transformOrigin: "center" };
+    return ((0, jsx_runtime_1.jsx)(svgIconContainer_1.SVGIconContainer, { iconName: "markdown", ref: ref, ...props, children: (0, jsx_runtime_1.jsx)("path", { d: isLarge ? "M360 360C382.0920000000001 360 400 342.0914 400 320V80C400 57.908 382.0920000000001 40 360 40H40C17.90862 40 0 57.908 0 80V320C0.0000038656 342.0914 17.9086 360 40 360H360zM200 263.6328C199.995 284.497 173.9456 293.3210000000001 161.1328 277.7734000000001L159.9414 276.1914L130 233.2032L100.0586 276.1914L98.8672 277.7734000000001C86.0546 293.3210000000001 60.005 284.4972 60 263.6328V140C60 128.954 68.9544 120 80 120C91.0456 120 100 128.954 100 140V206.2696L105.371 198.536L107.7734 195.528C120.44 181.466 143.439 182.464 154.629 198.536L160 206.2696V140C160 128.954 168.9542 120 180 120C191.0458 120 200 128.954 200 140V263.6328zM280 280C268.954 280 260 271.0456 260 260V195.274L245.372 212.8124L243.984 214.3164C236.742 221.4086 225.142 222.0006 217.188 215.371C209.234 208.7414 207.73 197.23 213.398 188.828L214.628 187.188L261.562 130.8780000000001L263.242 129.102C266.81 123.626 272.978 120 280 120C286.962 120 293.078 123.568 296.6600000000001 128.964C297.278 129.564 297.872 130.2 298.438 130.8780000000001L345.372 187.188L346.6020000000001 188.828C352.27 197.23 350.766 208.7414 342.812 215.371C334.858 222.0006 323.2580000000001 221.4086 316.016 214.3164L314.6280000000001 212.8124L300 195.274V260C300 271.0456 291.046 280 280 280z" : "M280 280C302.092 280 320 262.0914 320 240V80C320 57.908 302.092 40 280 40H40C17.90862 40 0 57.908 0 80V240C0.00000257706 262.0914 17.9086 280 40 280H280zM160 203.0468C160 216.8982 142.4938 221.9036 134.8632 211.582L133.4766 209.3164L110 162.3632L86.5234 209.3164L85.1368 211.582C77.5062 221.9034 60 216.8982 60 203.0468V110C60 104.478 64.4772 100 70 100C75.5228 100 80 104.478 80 110V177.6368L92.1094 153.418C99.4798 138.677 120.5202 138.677 127.8906 153.418L140 177.6368V110C140 104.478 144.4772 100 150 100C155.5228 100 160 104.478 160 110V203.0468zM230 220C224.478 220 220 215.5228 220 210V134.1406L207.07 147.0704L205.508 148.3594C201.626 150.9226 196.347 150.4876 192.9296 147.0704C189.5124 143.653 189.0774 138.3738 191.6406 134.4922L192.9296 132.9296L221.524 104.336C226.208 99.66 233.792 99.66 238.476 104.336L267.07 132.9296C270.976 136.835 270.976 143.165 267.07 147.0704C263.166 150.9756 256.834 150.9756 252.93 147.0704L240 134.1406V210C240 215.5228 235.522 220 230 220z", fillRule: "evenodd", transform: `scale(0.05, -0.05) translate(${translation}, ${translation})`, style: style }) }));
+});
+exports.Markdown.defaultProps = {
+    size: iconTypes_1.IconSize.STANDARD,
+};
+exports.Markdown.displayName = `Blueprint6.Icon.Markdown`;
+exports.default = exports.Markdown;
+//# sourceMappingURL=markdown.js.map

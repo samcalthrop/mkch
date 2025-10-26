@@ -16,6 +16,7 @@
     "frontendDist": "../dist"
   },
   "dependencies": {
+    "@blueprintjs/core": "^6.3.2",
     "@mantine/core": "^8.3.1",
     "@mantine/hooks": "^8.3.1",
     "@mantinex/dev-icons": "^2.0.0",
@@ -26,6 +27,7 @@
     "@xyflow/react": "^12.8.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-mosaic-component": "^6.1.1",
     "react-router-dom": "^7.7.0"
   },
   "devDependencies": {

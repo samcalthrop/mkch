@@ -2,10 +2,12 @@ use serde::{Deserialize, Serialize};
 
 // diagram data
 #[derive(Serialize, Deserialize)]
-pub struct NodeData {
-    pub id: String,
+pub struct Node {
+    pub id: f64,
+    pub label: String,
     pub position: Position,
-    pub data: NodeLabel,
+    pub arcs_in: Vec<Node>,
+    pub arcs_out: Vec<Node>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -15,12 +17,7 @@ pub struct Position {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct NodeLabel {
-    pub label: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct ArcData {
+pub struct Arc {
     pub id: String,
     pub source: String,
     pub target: String,
@@ -33,6 +30,6 @@ pub struct Config {
 
 #[derive(Serialize, Deserialize)]
 pub struct MarkovChainData {
-    pub nodes: Vec<NodeData>,
-    pub arcs: Vec<ArcData>,
+    pub nodes: Vec<Node>,
+    pub arcs: Vec<Arc>,
 }

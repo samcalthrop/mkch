@@ -1,0 +1,35 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LayoutThreeColumns = void 0;
+const tslib_1 = require("tslib");
+const jsx_runtime_1 = require("react/jsx-runtime");
+/*
+ * Copyright 2024 Palantir Technologies, Inc. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const React = tslib_1.__importStar(require("react"));
+const iconTypes_1 = require("../../iconTypes");
+const svgIconContainer_1 = require("../../svgIconContainer");
+exports.LayoutThreeColumns = React.forwardRef((props, ref) => {
+    const isLarge = props.size >= iconTypes_1.IconSize.LARGE;
+    const pixelGridSize = isLarge ? iconTypes_1.IconSize.LARGE : iconTypes_1.IconSize.STANDARD;
+    const translation = `${-1 * pixelGridSize / 0.05 / 2}`;
+    const style = { transformOrigin: "center" };
+    return ((0, jsx_runtime_1.jsx)(svgIconContainer_1.SVGIconContainer, { iconName: "layout-three-columns", ref: ref, ...props, children: (0, jsx_runtime_1.jsx)("path", { d: isLarge ? "M0 380C0 391.04568 8.9543 400 20 400H80C91.0456 400 100 391.0457 100 380V20C100 8.954 91.0456 0 80 0H20C8.9543 0 0 8.954 0 20V380zM140 380C140 391.04568 148.9544 400 160 400H240C251.046 400 260 391.0457 260 380V20C260 8.954 251.046 0 240 0H160C148.9544 0 140 8.954 140 20V380zM300 380C300 391.04568 308.954 400 320 400H380C391.046 400 400 391.0457 400 380V20C400 8.954 391.046 0 380 0H320C308.954 0 300 8.954 300 20V380z" : "M240 300C240 311.0457 248.954 320 260 320H300C311.046 320 320 311.0457 320 300V20C320 8.954 311.046 0 300 0H260C248.954 0 240 8.954 240 20V300zM120 300C120 311.0457 128.9544 320 140 320H180C191.0456 320 200 311.0457 200 300V20C200 8.954 191.0456 0 180 0H140C128.9544 0 120 8.954 120 20V300zM0 300C0 311.0457 8.9543 320 20 320H60C71.0456 320 80 311.0457 80 300V20C80 8.954 71.0456 0 60 0H20C8.9543 0 0 8.954 0 20V300z", fillRule: "evenodd", transform: `scale(0.05, -0.05) translate(${translation}, ${translation})`, style: style }) }));
+});
+exports.LayoutThreeColumns.defaultProps = {
+    size: iconTypes_1.IconSize.STANDARD,
+};
+exports.LayoutThreeColumns.displayName = `Blueprint6.Icon.LayoutThreeColumns`;
+exports.default = exports.LayoutThreeColumns;
+//# sourceMappingURL=layout-three-columns.js.map

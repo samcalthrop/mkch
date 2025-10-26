@@ -1,4 +1,4 @@
-use crate::types::{ArcData, Config, MarkovChainData, NodeData};
+use crate::types::{Arc, Config, MarkovChainData, Node};
 use crate::USER_SETTINGS_PATH;
 use serde_json::{self, json, Value};
 use std::fs;
@@ -42,8 +42,8 @@ pub fn fetch_markov_chain(name: String) -> MarkovChainData {
     let node_data_json: String = fs::read_to_string(node_json_path).unwrap();
     let arc_data_json: String = fs::read_to_string(arc_json_path).unwrap();
 
-    let nodes: Vec<NodeData> = serde_json::from_str(&node_data_json).unwrap();
-    let arcs: Vec<ArcData> = serde_json::from_str(&arc_data_json).unwrap();
+    let nodes: Vec<Node> = serde_json::from_str(&node_data_json).unwrap();
+    let arcs: Vec<Arc> = serde_json::from_str(&arc_data_json).unwrap();
 
     return MarkovChainData { nodes, arcs };
 }

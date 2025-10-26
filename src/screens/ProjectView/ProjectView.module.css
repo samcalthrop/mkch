@@ -1,0 +1,93 @@
+:root {
+    --base-hue: 240;
+    --base-sat: 0%;
+    --base: hsl(var(--base-hue), var(--base-sat), 12%);
+    --base-light: hsl(var(--base-hue), var(--base-sat), 14%);
+    --base-lighter: hsl(var(--base-hue), var(--base-sat), 30%);
+    --base-dark: hsl(var(--base-hue), var(--base-sat), 10%);
+    --base-darker: hsl(var(--base-hue), var(--base-sat), 8%);
+}
+
+.base {
+    background-color: var(--base);
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.mosaicDiv {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.tileContent {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background: var(--base);
+    align-items: 'center';
+    justify-content: 'center';
+}
+
+.mosaicDiv :global(.mosaic-root) {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.mosaicDiv :global(.mosaic-tile) {
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--base-light);
+    border-top: 1px solid var(--base-light);
+    border-right: 1px solid var(--base-dark);
+    border-bottom: 1px solid var(--base-dark);
+}
+
+.mosaicDiv :global(.mosaic-window-toolbar) {
+    height: 20px;
+    background: var(--base);
+    width: 100%;
+}
+
+.mosaicDiv :global(.mosaic-window-title) {
+    font-size: 12px;
+    line-height: 28px;
+    padding-left: 5px;
+    color: var(--base-lighter);
+    font-family: 'Fira Code';
+    font-size: 14px;
+}
+
+.mosaicDiv :global(.mosaic-split-line) {
+    background: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mosaicDiv :global(.mosaic-split.-row:hover) {
+    background: var(--base-light);
+    width: 4px;
+    z-index: 5;
+}
+
+.mosaicDiv :global(.mosaic-split.-column:hover) {
+    background: var(--base-light);
+    height: 4px;
+    z-index: 5;
+}
+
+.mosaicDiv :global(.mosaic-window-controls) {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
