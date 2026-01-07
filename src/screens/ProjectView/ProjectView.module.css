@@ -31,8 +31,12 @@
     flex-direction: column;
     flex: 1;
     background: var(--base);
-    align-items: 'center';
-    justify-content: 'center';
+    align-items: center;
+    justify-content: center;
+}
+
+.mosaicDiv :global(.mosaic-window-body) {
+    background-color: var(--base);
 }
 
 .mosaicDiv :global(.mosaic-root) {

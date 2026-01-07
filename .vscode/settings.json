@@ -1,0 +1,13 @@
+{
+  "cursor.cpp.disabledLanguages": [
+    "markdown",
+    "plaintext",
+    "typescript",
+    "ts",
+    "javascript",
+    "js"
+  ],
+  "editor.inlineSuggest.enabled": false,
+  "editor.quickSuggestionsDelay": 10,
+  "editor.suggest.selectionMode": "always"
+}

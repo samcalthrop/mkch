@@ -3,22 +3,9 @@ import { Mosaic, MosaicWindow } from "react-mosaic-component";
 import "react-mosaic-component/react-mosaic-component.css";
 import classes from "./ProjectView.module.css";
 
-import 'react-mosaic-component/react-mosaic-component.css';
-import '@blueprintjs/core/lib/css/blueprint.css';
-import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-
-// Custom tile components that fill their space completely
-const Tile = () => (
-  <div className={classes.tileContent}>
-    Drag nodes here to build your chain
-  </div>
-);
-
-const ELEMENT_MAP: { [viewId: string]: JSX.Element } = {
-  chain: <Tile />,
-  graph: <Tile />,
-  controls: <Tile />,
-};
+import "react-mosaic-component/react-mosaic-component.css";
+import "@blueprintjs/core/lib/css/blueprint.css";
+import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 
 export const ProjectView = (): JSX.Element => {
   return (
@@ -26,13 +13,15 @@ export const ProjectView = (): JSX.Element => {
       <Mosaic
         className={classes.mosaicDiv}
         renderTile={(id, path) => (
-          <MosaicWindow 
-            className={classes.tile} 
-            path={path} 
-            title={getTitleForId(id)} 
+          <MosaicWindow
+            className={classes.tile}
+            path={path}
+            title={getTitleForId(id)}
             draggable
           >
-            {ELEMENT_MAP[id as keyof typeof ELEMENT_MAP] || <div>Unknown view: {id}</div>}
+            {ELEMENT_MAP[id as keyof typeof ELEMENT_MAP] || (
+              <div>UNKNOWN VIEW: {id}</div>
+            )}
           </MosaicWindow>
         )}
         initialValue={{
@@ -47,13 +36,19 @@ export const ProjectView = (): JSX.Element => {
       />
     </div>
   );
-}
+};
+
+const ELEMENT_MAP: { [viewId: string]: JSX.Element } = {
+  chain: <MarkovView />,
+  graph: <></>,
+  controls: <></>,
+};
 
 const getTitleForId = (id: string): string => {
   const titles: { [key: string]: string } = {
     chain: "CHAIN",
-    graph: "GRAPH", 
-    controls: "PARAMETERS"
+    graph: "GRAPH",
+    controls: "PARAMETERS",
   };
   return titles[id] || id;
-}
+};

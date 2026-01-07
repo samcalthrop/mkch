@@ -13,7 +13,7 @@ pub fn run() {
         // .invoke_handler(tauri::generate_handler![greet])
         .setup(|app| {
             let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
-                .title("flow")
+                .title("mk.ch")
                 .inner_size(800.0, 600.0);
 
             let window = win_builder.build().unwrap();
