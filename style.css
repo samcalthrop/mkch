@@ -86,7 +86,11 @@
 }
 
 .dark {
-    --background: oklch(0.129 0.042 264.695);
+    --background-darker: oklch(0.040 0.042 264.695);
+    --background-dark: oklch(0.080 0.042 264.695);
+    --background: oklch(0.130 0.042 264.695);
+    --background-light: oklch(0.320 0.042 264.695);
+    --background-lighter: oklch(0.400 0.042 264.695);
     --foreground: oklch(0.984 0.003 247.858);
     --card: oklch(0.208 0.042 265.755);
     --card-foreground: oklch(0.984 0.003 247.858);
@@ -120,10 +124,11 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+    * {
+        @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
+
+    body {
+        @apply bg-background text-foreground;
     }
 }
