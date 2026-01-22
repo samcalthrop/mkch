@@ -1,0 +1,7 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-base);
+    color: var(--background-lightest);
+    /*font-weight: var(--font-weight-bold);*/
+}

@@ -7,70 +7,92 @@
     --base-lighter: hsl(var(--base-hue), var(--base-sat), 30%);
     --base-dark: hsl(var(--base-hue), var(--base-sat), 10%);
     --base-darker: hsl(var(--base-hue), var(--base-sat), 8%);
+
+    --box-titlebar-height: 24px;
 }
 
-.base {
-    /*background-color: var(--background);*/
-    height: 100vh;
+.primaryContainer {
+    /*gap: 1px;*/
+    display: flex;
+    height: calc(100vh - var(--titlebar-height));
     width: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+    background-color: var(--background-lighter);
 }
 
-.mosaicDiv {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.tileContent {
-    height: 100vh;
-    width: 100%;
+.secondaryContainer {
+    /*gap: 1px;*/
+    flex: 1;
     display: flex;
     flex-direction: column;
+    height: 100%;
+}
+
+.tertiaryContainer {
+    display: flex;
+    /*height: 100%;*/
     flex: 1;
-    /*background: var(--background);*/
-    align-items: center;
-    justify-content: center;
-}
-
-.mosaicDiv :global(.mosaic-window-body) {
-    background-color: var(--background);
-}
-
-.mosaicDiv :global(.mosaic-root) {
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-}
-
-.mosaicDiv :global(.mosaic-tile) {
-    margin: 0;
-    padding: 0;
-    border-left: 1px solid var(--background-light);
-    border-top: 1px solid var(--background-light);
-    border-right: 1px solid var(--background-dark);
-    border-bottom: 1px solid var(--background-dark);
-}
-
-.mosaicDiv :global(.mosaic-window-toolbar) {
-    height: 20px;
-    background: var(--background);
     width: 100%;
+    background-color: var(--background-lighter);
 }
 
-.mosaicDiv :global(.mosaic-window-title) {
-    font-size: 12px;
-    line-height: 28px;
-    padding-left: 5px;
-    color: var(--background-lighter);
-    font-family: 'Fira Code';
-    font-size: 14px;
+.chainBox {
+    background-color: var(--background);
+    height: 100%;
+    flex: 1.5;
+    border-left: 2px solid var(--background-light);
+    border-top: 2px solid var(--background-light);
+    /*border-right: 2px solid var(--background-light);*/
+    border-bottom: 2px solid var(--background-light);
+    border-radius: 8px;
 }
 
+.statesBox {
+    background-color: var(--background);
+    border-left: 2px solid var(--background-light);
+    border-top: 2px solid var(--background-light);
+    border-right: 2px solid var(--background-light);
+    border-bottom: 2px solid var(--background-light);
+    border-radius: 8px;
+    flex: 2;
+}
+
+.controlsBox {
+    background-color: var(--background);
+    border-left: 2px solid var(--background-light);
+    border-top: 2px solid var(--background-light);
+    border-right: 2px solid var(--background-light);
+    border-bottom: 2px solid var(--background-light);
+    border-radius: 8px;
+    flex: 1;
+}
+
+.graphBox {
+    background-color: var(--background);
+    border-left: 2px solid var(--background-light);
+    border-top: 2px solid var(--background-light);
+    border-right: 2px solid var(--background-light);
+    border-bottom: 2px solid var(--background-light);
+    border-radius: 8px;
+    flex: 1;
+}
+
+.boxTitlebar {
+    height: var(--box-titlebar-height);
+    font-size: var(--text-base);
+    color: var(--background-lightest);
+    font-family: var(--font);
+    background-color: var(--background-light);
+    font-weight: var(--font-weight-bold);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.boxContent {
+    height: calc(100% - var(--box-titlebar-height));
+}
+
+/*
 .mosaicDiv :global(.mosaic-split-line) {
     background: transparent;
     border: none;
@@ -88,10 +110,4 @@
     background: var(--background-light);
     height: 4px;
     z-index: 5;
-}
-
-.mosaicDiv :global(.mosaic-window-controls) {
-    background: transparent;
-    margin: 0;
-    padding: 0;
-}
+}*/

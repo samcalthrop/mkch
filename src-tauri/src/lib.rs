@@ -6,6 +6,11 @@ use tauri::{TitleBarStyle, WebviewUrl, WebviewWindowBuilder};
 // pub const USER_SETTINGS_PATH: &str = "./user_settings.json";
 pub const USER_SETTINGS_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/user_settings.json");
 
+pub trait WindowExt {
+    #[cfg(target_os = "macos")]
+    fn set_transparent_titlebar(&self, transparent: bool);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -14,9 +19,10 @@ pub fn run() {
         .setup(|app| {
             let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                 .title("mk.ch")
-                .inner_size(800.0, 600.0);
+                .inner_size(800.0, 600.0)
+                .title_bar_style(tauri::TitleBarStyle::Overlay);
 
-            let window = win_builder.build().unwrap();
+            let _window = win_builder.build().unwrap();
 
             Ok(())
         })

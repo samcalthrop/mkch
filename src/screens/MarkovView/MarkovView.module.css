@@ -1,11 +1,13 @@
 :root {
-    --node-colour: var(--card);
-    --node-text-colour: var(--background-lighter);
-    --arc-colour: var(--background-light);
-    --node-selected-colour: var(--accent);
-    --node-connection-width: 1;
-    --node-font: 'Fira Code';
-    --node-text-size: 12px;
+    --node-colour: var(--background-light);
+    --node-text-colour: var(--background-lightest);
+    --arc-colour: var(--background-lighter);
+    --node-selected-colour: var(--primary-foreground);
+    --node-text-selected-colour: var(--primary);
+    --node-arc-width: 2;
+    --node-font: var(--font);
+    --node-text-size: var(--text-base);
+    --node-font-weight: var(--font-weight-bold);
     --arrow-radius: 15;
     --node-border-radius: 8;
     --title-opacity: 1;
@@ -14,7 +16,7 @@
 .base {
     height: 100%;
     width: 100%;
-    background-color: transparent;
+    /*background-color: transparent;*/
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,6 +26,8 @@
     /*background-color: gray;*/
     height: 100%;
     position: relative;
+    background-image: radial-gradient(var(--background-light) 2px, transparent 0);
+    background-size: 40px 40px;
 }
 
 .chainCanvas {
@@ -36,8 +40,12 @@
 }
 
 .nodeButton {
-    border: 1px solid black;
+    /*border: 1px solid black;*/
     border-radius: 4px;
+}
+
+.icon {
+    /*color: var(--background-lightest);*/
 }
 
 .toolbarOverlay {

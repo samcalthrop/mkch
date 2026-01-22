@@ -1,0 +1,21 @@
+.tableRow:hover {
+    background-color: var(--muted);
+}
+
+.tableRow:nth-child(odd) {
+    background-color: var(--table-dark);
+}
+
+.tableRow:nth-child(even) {
+    background-color: var(--table-light);
+}
+
+.tableData {
+    padding: 8px 16px;
+    text-align: center;
+    /*border-bottom: 1px solid var(--table-light);*/
+}
+
+.tableBody {
+    background: var(--background-light);
+}

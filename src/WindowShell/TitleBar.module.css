@@ -1,0 +1,17 @@
+:root {
+    --titlebar-height: 30px;
+    --traffic-lights-width: 72px;
+}
+
+.titlebar {
+    height: var(--titlebar-height);
+    display: flex;
+    align-items: center;
+    padding-left: var(--traffic-lights-width);
+    user-select: none;
+    background-color: var(--background-lighter);
+}
+
+.titlebarContent {}
+
+.trafficLightsSpacer {}

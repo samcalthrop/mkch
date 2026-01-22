@@ -1,0 +1,24 @@
+:root {
+    --titlebar-height: 30px;
+}
+
+.window {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+    overflow: hidden;
+    height: calc(100% - var(--titlebar-height));
+}
+
+.titlebar {}
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}

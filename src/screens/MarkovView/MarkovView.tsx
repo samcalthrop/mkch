@@ -1,15 +1,17 @@
 import classes from "./MarkovView.module.css";
-import { Node, Arc, Coord2D } from "../../types";
+import { Arc, Coord2D, DraggingArcProps, MarkovNode } from "../../types";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
+import AddIcon from "../../assets/plus.svg?react";
+import { useSharedData } from "@/components/SharedDataProvider";
 
 // TODO:
 // turn nodes array into a set for faster lookup of id
 
 // const initialNodes: Map<string, Node> = new Map<string, Node>();
-const initialNodes: Node[] = [];
-const n1: Node = { id: "n1", label: "n1", position: { x: 10, y: 10 }, nodes_in: [], nodes_out: [], radius: 15 }
-const n2: Node = { id: "n2", label: "n2", position: { x: 100, y: 100 }, nodes_in: [], nodes_out: [], radius: 15 }
+const initialNodes: Array<MarkovNode> = [];
+const n1: MarkovNode = { id: "n1", label: "n1", position: { x: 10, y: 10 }, nodes_in: [], nodes_out: [], radius: 15 }
+const n2: MarkovNode = { id: "n2", label: "n2", position: { x: 100, y: 100 }, nodes_in: [], nodes_out: [], radius: 15 }
 n1.nodes_out.push(n2);
 n2.nodes_in.push(n1);
 initialNodes.push(n1);
@@ -21,39 +23,32 @@ export const MarkovView = (): JSX.Element => {
   const nodeWidth = 40;
   const nodeHeight = 30;
   const nodeHitboxRadius = Math.sqrt(Math.pow(nodeWidth / 2, 2) + Math.pow(nodeHeight / 2, 2));
-  // const {
-  //   counter,
-  //   selectedFile,
-  //   setSelectedFile,
-  //   nodeWidth,
-  //   setNodeRadius,
-  //   titleOpacity,
-  // } = useSharedData();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationFrameId = useRef<number>();
-  const [nodes, setNodes] = useState<Node[]>([...initialNodes]);
-  const nodesRef = useRef<Node[]>([...initialNodes]);
-  const [arcs, setArcs] = useState<Arc[]>([...initialArcs]);
+  const nodesRef = useRef<Array<MarkovNode>>([...initialNodes]);
   const [mode, setMode] = useState('edit');
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [selectedNode, setSelectedNode] = useState<MarkovNode | null>(null);
   const [draggedNode, setDraggedNode] = useState<string | null>(null);
   const draggedNodeRef = useRef<string | null>(null);
-  const [draggingArc, setDraggingArc] = useState<{
-    fromID: string;
-    toPos: Coord2D;
-  } | null>(null);
-  const draggingArcRef = useRef<{
-    fromID: string;
-    toPos: Coord2D;
-  } | null>(null);
+  const mousePos = useRef<Coord2D | null>(null);
+  const [draggingArc, setDraggingArc] = useState<DraggingArcProps | null>(null);
+  const draggingArcRef = useRef<DraggingArcProps | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
+  // global mouse up handler for dragging outside canvas
+  // store handler in ref so it can access latest values without recreating listeners
+  const handleGlobalMouseUpRef = useRef<(e: MouseEvent) => void>();
+  const selectedNodeRef = useRef<MarkovNode | null>(null);
+
+  const { currentNodes, setCurrentNodes, currentArcs, setCurrentArcs } = useSharedData();
+
   // add node to nodes
-  const addNode = (node: Node) => {
-    setNodes((prev) => {
+  const addNode = (node: MarkovNode) => {
+    setCurrentNodes((prev) => {
+      const safePrev = prev ?? [];
       const newNodes = [
-        ...prev,
+        ...safePrev,
         { id: node.id, label: node.label, position: node.position, nodes_in: node.nodes_in, nodes_out: node.nodes_out, radius: node.radius }
       ];
       nodesRef.current = newNodes;
@@ -62,19 +57,23 @@ export const MarkovView = (): JSX.Element => {
   };
 
   const addArc = (arc: Arc) => {
-    setArcs((prev) => [
-      ...prev,
-      {
-        fromID: arc.fromID,
-        toID: arc.toID,
-        weight: arc.weight,
-      },
-    ]);
+    setCurrentArcs((prev) => {
+      const safePrev = prev ?? [];
+      const newArcs = [
+        ...safePrev,
+        {
+          fromID: arc.fromID,
+          toID: arc.toID,
+          weight: arc.weight,
+        },
+      ];
+      return newArcs;
+    });
   }
 
   // return node using ID
-  const getNodeByID = (nodeId: string): Node => {
-    nodes.forEach((node) => {
+  const getNodeByID = (nodeId: string): MarkovNode => {
+    currentNodes?.forEach((node) => {
       if (node.id === nodeId) return node
     });
     return {
@@ -88,8 +87,8 @@ export const MarkovView = (): JSX.Element => {
   };
 
   // return nodes connected by arc
-  const getArcNodes = (arc: string): Array<Node> => {
-    let nodeIdArray: Array<Node> = [];
+  const getArcNodes = (arc: string): Array<MarkovNode> => {
+    let nodeIdArray: Array<MarkovNode> = [];
     let strIdArray: Array<string> = arc.split("-");
     strIdArray.forEach((nodeID: string) => nodeIdArray.push(getNodeByID(nodeID)));
     return nodeIdArray;
@@ -98,7 +97,7 @@ export const MarkovView = (): JSX.Element => {
   /* check if given position is valid (not overlapping with other nodes),
    memoising to optimise expensive calculations */
   const isValidPosition = useCallback(
-    (x: number, y: number, existingNodes: Node[]): boolean => {
+    (x: number, y: number, existingNodes: Array<MarkovNode>): boolean => {
       const minDistance = 2 * (nodeWidth || 15);
       return !existingNodes.some(
         /* performing pythagoras to check if the distance between the two nodes is less than
@@ -110,7 +109,7 @@ export const MarkovView = (): JSX.Element => {
   );
 
   // generate random position within canvas
-  const getRandomPosition = (existingNodes: Node[], attempts = 1000): Coord2D => {
+  const getRandomPosition = (existingNodes: Array<MarkovNode>, attempts = 1000): Coord2D => {
     const padding = 50; // padding from canvas edges
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -140,13 +139,18 @@ export const MarkovView = (): JSX.Element => {
 
   const onNewNodeClicked = () => {
     const uid = createID();
-    addNode({ id: uid, label: "untitled node", position: getRandomPosition(nodes), nodes_in: [], nodes_out: [], radius: 15 });
+    addNode({ id: uid, label: "untitled node", position: getRandomPosition(currentNodes ?? []), nodes_in: [], nodes_out: [], radius: 15 });
   };
 
   const NewNodeButton = (): JSX.Element => {
     return (
-      <Button variant="outline" size="sm" onClick={onNewNodeClicked}>
-        click me
+      <Button variant="ghost" size="sm" onClick={onNewNodeClicked}>
+        <AddIcon
+          width={40}
+          height={40}
+          strokeWidth={3}
+          className={classes.icon}
+        />
       </Button>
     );
   };
@@ -160,30 +164,35 @@ export const MarkovView = (): JSX.Element => {
 
     // retrieving network styling from css file
     const computedStyle: CSSStyleDeclaration = getComputedStyle(document.documentElement);
+
+    // node props
     const nodeColour: string = computedStyle.getPropertyValue('--node-colour') || '#2E2B33';
-    const nodeTextColour: string =
-      computedStyle.getPropertyValue('--node-text-colour') || '#FED5FB';
-    const arcColour: string =
-      computedStyle.getPropertyValue('--arc-colour') || '#4A4850';
-    const selectedColour: string =
-      computedStyle.getPropertyValue('--node-selected-colour') || '#61497C';
-    const connectionWidth: number =
-      parseInt(computedStyle.getPropertyValue('--node-connection-width')) || 2;
-    const fontFamily: string = computedStyle.getPropertyValue('--node-font') || 'Fira Code';
-    const textSize: string = computedStyle.getPropertyValue('--node-text-size') || '12px';
-    const arrowRadius: number = Number(computedStyle.getPropertyValue('--arrow-radius')) || 15;
     const nodeBorderRadius: number = Number(computedStyle.getPropertyValue('--node-border-radius')) || 10;
+    const nodeTextColour: string = computedStyle.getPropertyValue('--node-text-colour') || '#FED5FB';
+    const nodeTextColourSelected = computedStyle.getPropertyValue('--node-text-selected-colour') || 'white';
+    const selectedColour: string = computedStyle.getPropertyValue('--node-selected-colour') || '#61497C';
+    const textSize: string = computedStyle.getPropertyValue('--node-text-size') || '12px';
     const titleOpacity: number = Number(computedStyle.getPropertyValue('--title-opacity')) || .6;
+    const fontFamily: string = computedStyle.getPropertyValue('--node-font') || 'Fira Code';
+    const fontWeight: number = Number(computedStyle.getPropertyValue('--node-font-weight')) || 700;
+
+    // arc props
+    const arcColour: string = computedStyle.getPropertyValue('--muted') || 'oklch(0.6308 0.143 360)';
+    const arcWidth: number = parseInt(computedStyle.getPropertyValue('--node-arc-width')) || 2;
+    const arrowRadius: number = Number(computedStyle.getPropertyValue('--arrow-radius')) || 15;
+
+    // other / background
+    const blurColour: string = computedStyle.getPropertyValue('--primary') || 'oklch(0.244 0.025 264.695)';
 
     // batch similar operations
     ctx.strokeStyle = arcColour;
-    ctx.lineWidth = connectionWidth;
+    ctx.lineWidth = arcWidth;
 
     // draw connections
     ctx.beginPath();
-    arcs.forEach((arc) => {
-      const fromNode = nodes.find((node) => node.id === arc.fromID);
-      const toNode = nodes.find((node) => node.id === arc.toID);
+    currentArcs?.forEach((arc) => {
+      const fromNode = currentNodes?.find((node) => node.id === arc.fromID);
+      const toNode = currentNodes?.find((node) => node.id === arc.toID);
       if (fromNode && toNode) {
         ctx.moveTo(fromNode.position.x, fromNode.position.y);
         ctx.lineTo(toNode.position.x, toNode.position.y);
@@ -194,50 +203,52 @@ export const MarkovView = (): JSX.Element => {
         if (fromNode.position.x > toNode.position.x || (fromNode.position.y > toNode.position.y && fromNode.position.x > toNode.position.x)) gamma += Math.PI;
         theta = 2 * Math.PI - gamma;
         alpha = 5 * Math.PI / 4 - theta;
-        // '+ 5 * Math.cos(gamma)' etc shifts the arrows slightly such that their centre aligns with the centre of the arcs, instead of the tip aligning
-        ctx.moveTo((fromNode.position.x + toNode.position.x) / 2 + 5 * Math.cos(gamma), (fromNode.position.y + toNode.position.y) / 2 + 5 * Math.sin(gamma));
-        ctx.lineTo(((fromNode.position.x + toNode.position.x) / 2 + 5 * Math.cos(gamma)) + arrowRadius * Math.cos(alpha), ((fromNode.position.y + toNode.position.y) / 2 + 5 * Math.sin(gamma)) + arrowRadius * Math.sin(alpha));
-        ctx.moveTo((fromNode.position.x + toNode.position.x) / 2 + 5 * Math.cos(gamma), (fromNode.position.y + toNode.position.y) / 2 + 5 * Math.sin(gamma));
-        ctx.lineTo(((fromNode.position.x + toNode.position.x) / 2 + 5 * Math.cos(gamma)) + arrowRadius * Math.sin(alpha), ((fromNode.position.y + toNode.position.y) / 2 + 5 * Math.sin(gamma)) - arrowRadius * Math.cos(alpha));
+        // '+ 5 * Math.cos(gamma)' etc. shifts the arrows slightly such that their centre aligns with the centre of the arcs, instead of the tip aligning
+        const xCentringFactor: number = 5 * Math.cos(gamma);
+        const yCentringFactor: number = 5 * Math.sin(gamma);
+
+        ctx.moveTo((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor, (fromNode.position.y + toNode.position.y) / 2 + yCentringFactor);
+        ctx.lineTo(((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor) + arrowRadius * Math.cos(alpha), ((fromNode.position.y + toNode.position.y) / 2 + yCentringFactor) + arrowRadius * Math.sin(alpha));
+        ctx.moveTo((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor, (fromNode.position.y + toNode.position.y) / 2 + yCentringFactor);
+        ctx.lineTo(((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor) + arrowRadius * Math.sin(alpha), ((fromNode.position.y + toNode.position.y) / 2 + yCentringFactor) - arrowRadius * Math.cos(alpha));
       }
     });
     ctx.stroke();
 
     // batch text rendering
     ctx.fillStyle = nodeTextColour;
-    ctx.font = `${textSize} ${fontFamily}`;
+    ctx.font = `${fontWeight} ${textSize} ${fontFamily}`;
     ctx.textAlign = 'center';
     ctx.globalAlpha = titleOpacity;
-    nodes.forEach((node) => {
+    currentNodes?.forEach((node) => {
       ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + 30);
     });
-    ctx.globalAlpha = 1;
 
-    // batch node drawing
-    ctx.fillStyle = nodeColour;
-    ctx.beginPath();
-    nodes.forEach((node) => {
-      // ctx.moveTo(node.position.x + (nodeHitboxRadius || 40), node.position.y);
-      ctx.roundRect(node.position.x - (nodeWidth / 2), node.position.y - (nodeHeight / 2), nodeWidth, nodeHeight, nodeBorderRadius);
-    });
-    ctx.fill();
-
-    // drawing selected node
+    // highlighting selected node's label
     if (selectedNode) {
-      ctx.fillStyle = selectedColour;
+      ctx.fillStyle = nodeTextColourSelected;
       ctx.beginPath();
-      nodes.forEach((node) => {
+      currentNodes?.forEach((node) => {
         if (node.id === selectedNode.id) {
-          ctx.roundRect(node.position.x - (nodeWidth / 2), node.position.y - (nodeHeight / 2), nodeWidth, nodeHeight, nodeBorderRadius);
-          ctx.fill();
+          ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + 30);
         }
       });
     }
+    ctx.globalAlpha = 1;
+
+    // radial blur gradient following mouse
+    let radgrad = ctx.createRadialGradient(mousePos.current?.x ?? -1000, mousePos.current?.y ?? -1000, 0, mousePos.current?.x ?? -1000, mousePos.current?.y ?? -1000, 200);
+    radgrad.addColorStop(1, 'transparent');
+    radgrad.addColorStop(0, blurColour);
+    ctx.fillStyle = radgrad;
+    ctx.globalAlpha = .15;
+    ctx.fillRect(0, 0, canvasRef.current?.width ?? 2000, canvasRef.current?.height ?? 2000);
+    ctx.globalAlpha = 1;
 
     if (mode == 'edit') {
       // draw dragging connection
       if (draggingArc) {
-        const fromNode = nodes.find((node) => node.id === draggingArc.fromID);
+        const fromNode = currentNodes?.find((node) => node.id === draggingArc.fromID);
         if (fromNode) {
           ctx.beginPath();
           ctx.setLineDash([5, 5]);
@@ -249,19 +260,38 @@ export const MarkovView = (): JSX.Element => {
       }
     }
 
+    // batch node drawing
+    ctx.fillStyle = nodeColour;
+    ctx.beginPath();
+    currentNodes?.forEach((node) => {
+      // ctx.moveTo(node.position.x + (nodeHitboxRadius || 40), node.position.y);
+      ctx.roundRect(node.position.x - (nodeWidth / 2), node.position.y - (nodeHeight / 2), nodeWidth, nodeHeight, nodeBorderRadius);
+    });
+    ctx.fill();
+
+    // drawing selected node
+    if (selectedNode) {
+      ctx.fillStyle = selectedColour;
+      ctx.beginPath();
+      currentNodes?.forEach((node) => {
+        if (node.id === selectedNode.id) {
+          ctx.roundRect(node.position.x - (nodeWidth / 2), node.position.y - (nodeHeight / 2), nodeWidth, nodeHeight, nodeBorderRadius);
+          ctx.fill();
+        }
+      });
+    }
+
     // in the case that edit mode is on, these features are drawn
     if (mode == 'run') {
       // what the chain looks like when the program is running
     }
   }, [
-    nodes,
-    arcs,
+    currentNodes,
+    currentArcs,
     draggingArc,
     nodeWidth,
     mode,
     selectedNode,
-    // counter,
-    // selectedFile,
   ]);
 
   // check if user has clicked an arc
@@ -269,8 +299,8 @@ export const MarkovView = (): JSX.Element => {
     // this function should only work if user is in edit mode
     if (mode !== 'edit') return false;
 
-    const fromNode = nodes.find((n) => n.id === arc.fromID);
-    const toNode = nodes.find((n) => n.id === arc.toID);
+    const fromNode = currentNodes?.find((n) => n.id === arc.fromID);
+    const toNode = currentNodes?.find((n) => n.id === arc.toID);
     if (!fromNode || !toNode) return false;
 
     const nodeA = { x: fromNode.position.x, y: fromNode.position.y };
@@ -305,7 +335,7 @@ export const MarkovView = (): JSX.Element => {
   };
 
   // check if user has clicked a node, returning the node if so
-  const nodeClicked = (x: number, y: number, nodeArray: Array<Node>): Node | undefined => {
+  const nodeClicked = (x: number, y: number, nodeArray: Array<MarkovNode>): MarkovNode | undefined => {
     return nodeArray.find(
       (node) => Math.sqrt(Math.pow(node.position.x - x, 2) + Math.pow(node.position.y - y, 2)) < (nodeHitboxRadius ?? 15)
     );
@@ -320,7 +350,7 @@ export const MarkovView = (): JSX.Element => {
     const { x, y } = handleMousePosition(e.clientX, e.clientY);
 
     // check if clicking on a node
-    const clickedNode = nodes.find(
+    const clickedNode = currentNodes?.find(
       (node) => Math.sqrt(Math.pow(node.position.x - x, 2) + Math.pow(node.position.y - y, 2)) < (nodeHitboxRadius ?? 15)
     );
 
@@ -337,10 +367,10 @@ export const MarkovView = (): JSX.Element => {
     const scaleX = rect.width / canvasRef.current!.width;
     const scaleY = rect.height / canvasRef.current!.height;
 
-    return {
-      x: (clientX - rect.left) / scaleX,
-      y: (clientY - rect.top) / scaleY,
-    };
+    const newX = (clientX - rect.left) / scaleX;
+    const newY = (clientY - rect.top) / scaleY;
+
+    return { x: newX, y: newY };
   }, []);
 
   // mouse event handlers
@@ -357,24 +387,24 @@ export const MarkovView = (): JSX.Element => {
     const rightClick: number = 2;
 
     // check if clicking on a connection (to remove it)
-    const clickedArc = arcs.find((arc) => {
+    const clickedArc = currentArcs?.find((arc) => {
       return isClickOnArc(x, y, arc);
     });
 
     // remove connection if clicked
     if (clickedArc) {
       console.log("arc clicked: ", clickedArc)
-      setArcs((prev) =>
-        prev.filter(
+      setCurrentArcs((prev) => {
+        const safePrev = prev ?? [];
+        return safePrev.filter(
           (arc) =>
             arc.fromID !== clickedArc.fromID || arc.toID !== clickedArc.toID
         )
-      );
-      return;
+      });
     }
 
     // check if clicking on a node
-    const clickedNode = nodeClicked(x, y, nodes);
+    const clickedNode = nodeClicked(x, y, currentNodes ?? []);
 
     if (clickedNode) {
       setSelectedNode(clickedNode);
@@ -397,8 +427,8 @@ export const MarkovView = (): JSX.Element => {
     }
   };
 
-  // Global mouse move handler for dragging outside canvas
-  // Store handler in ref so it can access latest values without recreating listeners
+  // global mouse move handler for dragging outside canvas
+  // store handler in ref so it can access latest values without recreating listeners
   const handleGlobalMouseMoveRef = useRef<(e: MouseEvent) => void>();
 
   useEffect(() => {
@@ -422,8 +452,9 @@ export const MarkovView = (): JSX.Element => {
       // update canvas to draw the node in its new position, and assign it a new position internally
       const currentDraggedNode = draggedNodeRef.current;
       if (currentDraggedNode) {
-        setNodes((prev) => {
-          const newNodes = prev.map((node) => (node.id === currentDraggedNode ? { ...node, position: { x, y } } : node));
+        setCurrentNodes((prev) => {
+          const safePrev = prev ?? [];
+          const newNodes = safePrev.map((node: MarkovNode) => (node.id === currentDraggedNode ? { ...node, position: { x, y } } : node));
           nodesRef.current = newNodes;
           return newNodes;
         });
@@ -450,14 +481,15 @@ export const MarkovView = (): JSX.Element => {
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>): void => {
       handleGlobalMouseMove(e.nativeEvent);
+      const { offsetX, offsetY } = e.nativeEvent;
+      mousePos.current = { x: offsetX, y: offsetY };
     },
     [handleGlobalMouseMove]
   );
 
-  // global mouse up handler for dragging outside canvas
-  // store handler in ref so it can access latest values without recreating listeners
-  const handleGlobalMouseUpRef = useRef<(e: MouseEvent) => void>();
-  const selectedNodeRef = useRef<Node | null>(null);
+  const handleMouseLeave = useCallback(() => {
+    mousePos.current = null;
+  }, [])
 
   // keep selectedNodeRef in sync with selectedNode state
   useEffect(() => {
@@ -466,8 +498,8 @@ export const MarkovView = (): JSX.Element => {
 
   // keep nodesRef in sync with nodes state
   useEffect(() => {
-    nodesRef.current = nodes;
-  }, [nodes]);
+    nodesRef.current = currentNodes ?? [];
+  }, [currentNodes]);
 
   // handle dragging arcs
   useEffect(() => {
@@ -483,6 +515,7 @@ export const MarkovView = (): JSX.Element => {
       }
 
       const { x, y } = handleMousePosition(e.clientX, e.clientY);
+      // setMousePos({ x, y });
 
       if (selectedNodeRef.current) setSelectedNode(null);
 
@@ -622,10 +655,11 @@ export const MarkovView = (): JSX.Element => {
       <canvas
         className={classes.chainCanvas}
         ref={canvasRef}
+        onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
         onContextMenu={handleContextMenu}
+        onMouseLeave={handleMouseLeave}
       />
       <div className={classes.toolbarOverlay}>
         <div className={classes.toolbarItem}>
