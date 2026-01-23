@@ -578,14 +578,13 @@ export const MarkovView = (): JSX.Element => {
     // Initial resize
     resizeCanvas();
 
-    // Use ResizeObserver to watch for container size changes
-    // This catches resizes from mosaic tiles, not just window resizes
+    // ResizeObserver to eatches for container size changes
     const resizeObserver = new ResizeObserver(() => {
       resizeCanvas();
     });
     resizeObserver.observe(canvas);
 
-    // Also listen to window resize as a fallback
+    // also listen to window resize as a fallback
     window.addEventListener('resize', resizeCanvas);
 
     return (): void => {

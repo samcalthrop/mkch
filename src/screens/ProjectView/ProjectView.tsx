@@ -2,44 +2,52 @@ import { MarkovView } from "../MarkovView";
 import classes from "./ProjectView.module.css";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
-import { BoxViewProps } from "@/types";
 import { StatesView } from "../StatesView";
-
-const BoxView = ({ title, children }: BoxViewProps): JSX.Element => {
-  return (
-    <>
-      <div className={classes.boxTitlebar}>
-        {title}
-      </div>
-      <div className={classes.boxContent}>
-        {children}
-      </div>
-    </>
-  )
-}
+import { ResizableBox } from "@/components/ResizableBox";
 
 export const ProjectView = (): JSX.Element => {
+  const resize = (e: MouseEvent, axis: "x" | "y", onResize: (delta: number) => void): void => {
+    e.preventDefault();
+    const start = axis == "x" ? e.clientX : e.clientY;
+
+    const move = (ev: MouseEvent) => {
+      const current = axis == "x" ? ev.clientX : ev.clientY;
+      onResize(current - start);
+    };
+
+    const stop = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", stop);
+    };
+
+    window.addEventListener("mousemove", move);
+    window.removeEventListener("mouseup", stop);
+  };
+
   return (
     <div className={classes.primaryContainer}>
       <div className={classes.chainBox}>
-        <BoxView title="Chain">
+        <ResizableBox title="Chain">
           <MarkovView />
-        </BoxView>
+        </ResizableBox>
       </div>
       <div className={classes.secondaryContainer}>
         <div className={classes.tertiaryContainer}>
           <div className={classes.statesBox}>
-            <BoxView title="States">
+            <ResizableBox title="States">
               <StatesView />
-            </BoxView>
+            </ResizableBox>
           </div>
           <div className={classes.controlsBox}>
-            <BoxView title="Controls"><></></BoxView>
+            <ResizableBox title="Controls"><></></ResizableBox>
           </div>
         </div>
         <div className={classes.graphBox}>
-          <BoxView title="Graph"><></></BoxView>
+          <ResizableBox title="Graph"><></></ResizableBox>
         </div>
+        <div className={classes.resizeVertical} onMouseDown={(e) => startResize} />
+        <div className={classes.resizeHorizontal} />
+        <div className={classes.resizeVerticalInner} />
       </div>
     </div >
   );

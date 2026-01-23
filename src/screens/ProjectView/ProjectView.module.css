@@ -12,33 +12,44 @@
 }
 
 .primaryContainer {
+    min-height: 0;
     /*gap: 1px;*/
-    display: flex;
+    display: grid;
     height: calc(100vh - var(--titlebar-height));
     width: 100%;
     background-color: var(--background-lighter);
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: 1fr;
 }
 
 .secondaryContainer {
+    min-height: 0;
     /*gap: 1px;*/
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     height: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
 .tertiaryContainer {
-    display: flex;
+    min-height: 0;
+    display: grid;
     /*height: 100%;*/
-    flex: 1;
     width: 100%;
     background-color: var(--background-lighter);
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+.primaryContainer>*,
+.secondaryContainer>*,
+.tertiaryContainer>* {
+    min-height: 0;
 }
 
 .chainBox {
     background-color: var(--background);
     height: 100%;
-    flex: 1.5;
     border-left: 2px solid var(--background-light);
     border-top: 2px solid var(--background-light);
     /*border-right: 2px solid var(--background-light);*/
@@ -53,17 +64,14 @@
     border-right: 2px solid var(--background-light);
     border-bottom: 2px solid var(--background-light);
     border-radius: 8px;
-    flex: 2;
 }
 
 .controlsBox {
     background-color: var(--background);
-    border-left: 2px solid var(--background-light);
     border-top: 2px solid var(--background-light);
     border-right: 2px solid var(--background-light);
     border-bottom: 2px solid var(--background-light);
     border-radius: 8px;
-    flex: 1;
 }
 
 .graphBox {
@@ -73,23 +81,42 @@
     border-right: 2px solid var(--background-light);
     border-bottom: 2px solid var(--background-light);
     border-radius: 8px;
-    flex: 1;
 }
 
-.boxTitlebar {
-    height: var(--box-titlebar-height);
-    font-size: var(--text-base);
-    color: var(--background-lightest);
-    font-family: var(--font);
-    background-color: var(--background-light);
-    font-weight: var(--font-weight-bold);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.resizeVertical {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+    cursor: col-resize;
+    width: 1px;
+    left: 60%;
+    top: var(--titlebar-height);
+    bottom: 0;
+    background-color: white;
 }
 
-.boxContent {
-    height: calc(100% - var(--box-titlebar-height));
+.resizeHorizontal {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+    cursor: row-resize;
+    height: 1px;
+    top: calc(14px + 50%);
+    left: 60%;
+    right: 0;
+    background-color: white;
+}
+
+.resizeVerticalInner {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+    cursor: col-resize;
+    width: 1px;
+    left: 80%;
+    top: var(--titlebar-height);
+    bottom: calc(50% - 14px);
+    background-color: white;
 }
 
 /*

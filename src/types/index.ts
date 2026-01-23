@@ -1,3 +1,4 @@
+// chain types ----------------------------------------------------------------
 export interface MarkovNode {
   id: string;
   label?: string;
@@ -23,12 +24,14 @@ export interface DraggingArcProps {
   toPos: Coord2D;
 }
 
+// layout props ---------------------------------------------------------------
+
 export type BoxViewProps = {
   title: string
   children: React.ReactNode
 }
 
-// theme types
+// theme types ----------------------------------------------------------------
 export type Theme = "dark" | "light" | "system";
 
 export type ThemeProviderProps = {
@@ -42,7 +45,7 @@ export type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
-// shared data types
+// shared data types ----------------------------------------------------------
 export type SharedDataProviderProps = {
   children: React.ReactNode;
 };
@@ -56,7 +59,7 @@ export type SharedData = {
   setCurrentArcs: React.Dispatch<React.SetStateAction<Array<Arc> | null>>;
 };
 
-// table types
+// table types ----------------------------------------------------------------
 export type ColumnDefinitionType<T, K extends keyof T> = {
   key: K;
   header: string;

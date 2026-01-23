@@ -1,0 +1,28 @@
+.boxContainer {
+    height: 100%;
+}
+
+.boxTitlebar {
+    height: var(--box-titlebar-height);
+    background-color: var(--background-light);
+}
+
+.boxTitlebar:hover {
+    cursor: default;
+}
+
+.titleText {
+    font-size: var(--text-base);
+    color: var(--background-lightest);
+    font-family: var(--font);
+    font-weight: var(--font-weight-bold);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.boxContent {
+    height: calc(100% - var(--box-titlebar-height));
+    overflow: auto;
+}
