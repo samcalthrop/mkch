@@ -9,7 +9,6 @@ export const StatesView = (): JSX.Element => {
     {
       key: 'label',
       header: 'State',
-      width: 150
     },
     {
       key: 'position',

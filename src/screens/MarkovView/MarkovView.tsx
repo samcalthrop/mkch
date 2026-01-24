@@ -115,8 +115,8 @@ export const MarkovView = (): JSX.Element => {
     if (!canvas) return { x: 0, y: 0 };
 
     for (let i = 0; i < attempts; i++) {
-      const x = padding + Math.random() * (canvas.width - 2 * padding);
-      const y = padding + Math.random() * (canvas.height - 2 * padding);
+      const x = Math.floor(padding + Math.random() * (canvas.width - 2 * padding));
+      const y = Math.floor(padding + Math.random() * (canvas.height - 2 * padding));
       if (isValidPosition(x, y, existingNodes)) {
         return { x, y };
       }

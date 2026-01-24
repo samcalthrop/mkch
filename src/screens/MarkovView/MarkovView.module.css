@@ -7,7 +7,7 @@
     --node-arc-width: 2;
     --node-font: var(--font);
     --node-text-size: var(--text-base);
-    --node-font-weight: var(--font-weight-bold);
+    --node-font-weight: var(--font-weight-semibold);
     --arrow-radius: 15;
     --node-border-radius: 8;
     --title-opacity: 1;

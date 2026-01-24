@@ -3,6 +3,7 @@
     text-align: center;
     border-bottom: 2px solid var(--background-light);
     font-weight: var(--font-weight-bold);
+    font-family: Lilex;
 }
 
 .tHead {

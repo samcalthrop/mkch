@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+    font-family: "Lilex";
+    src: url("./src/assets/fonts/Lilex/variable/Lilex[wght].ttf");
+}
+
+html,
+body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
+    /* disables smooth bounce */
+}
+
 @custom-variant dark (&:is(.dark *));
 
 .body {
@@ -84,7 +96,7 @@
     --sidebar-border: oklch(0.929 0.013 255.508);
     --sidebar-ring: oklch(0.704 0.04 256.788);
 
-    --font: system-ui, verdana, inter, 'Mona Sans', Fira Code;
+    --font: Lilex, system-ui, verdana, inter, 'Mona Sans', Fira Code;
     --titlebar-height: 30px;
     --traffic-lights-width: 72px;
 }

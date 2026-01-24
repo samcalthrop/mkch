@@ -9,35 +9,34 @@
     --base-darker: hsl(var(--base-hue), var(--base-sat), 8%);
 
     --box-titlebar-height: 24px;
+    --left: 60%;
+    --right-inner: 50%;
+    --top: 50%;
 }
 
 .primaryContainer {
     min-height: 0;
-    /*gap: 1px;*/
     display: grid;
     height: calc(100vh - var(--titlebar-height));
     width: 100%;
     background-color: var(--background-lighter);
-    grid-template-columns: 1.5fr 1fr;
-    grid-template-rows: 1fr;
+    grid-template-columns: clamp(10%, var(--left), 60%) 1px 1fr;
 }
 
 .secondaryContainer {
     min-height: 0;
-    /*gap: 1px;*/
     display: grid;
     height: 100%;
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: clamp(30%, var(--top), 70%) 1px 1fr;
 }
 
 .tertiaryContainer {
     min-height: 0;
     display: grid;
-    /*height: 100%;*/
     width: 100%;
     background-color: var(--background-lighter);
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: clamp(30%, var(--right-inner), 70%) 1px 1fr;
     grid-template-rows: 1fr;
 }
 
@@ -52,7 +51,6 @@
     height: 100%;
     border-left: 2px solid var(--background-light);
     border-top: 2px solid var(--background-light);
-    /*border-right: 2px solid var(--background-light);*/
     border-bottom: 2px solid var(--background-light);
     border-radius: 8px;
 }
@@ -84,57 +82,47 @@
 }
 
 .resizeVertical {
-    position: absolute;
     background: transparent;
     z-index: 10;
     cursor: col-resize;
-    width: 1px;
-    left: 60%;
+    width: 10px;
+    left: var(--left);
     top: var(--titlebar-height);
     bottom: 0;
-    background-color: white;
+}
+
+.resizeVertical:hover {
+    width: 5px;
+    background-color: var(--background-lighter);
 }
 
 .resizeHorizontal {
-    position: absolute;
     background: transparent;
     z-index: 10;
     cursor: row-resize;
-    height: 1px;
-    top: calc(14px + 50%);
-    left: 60%;
+    height: 2px;
+    top: calc(var(--top) + 14px);
+    left: var(--left);
     right: 0;
-    background-color: white;
+    background-color: var(--background-light);
+}
+
+.resizeHorizontal:hover {
+    height: 5px;
+    background-color: var(--background-lighter);
 }
 
 .resizeVerticalInner {
-    position: absolute;
     background: transparent;
     z-index: 10;
     cursor: col-resize;
-    width: 1px;
-    left: 80%;
+    width: 10px;
+    left: calc(var(--left) + calc(var(--right-inner) * var(--left)));
     top: var(--titlebar-height);
-    bottom: calc(50% - 14px);
-    background-color: white;
+    bottom: calc(var(--top) - 14px);
 }
 
-/*
-.mosaicDiv :global(.mosaic-split-line) {
-    background: transparent;
-    border: none;
-    margin: 0;
-    padding: 0;
+.resizeVerticalInner:hover {
+    width: 5px;
+    background-color: var(--background-lighter);
 }
-
-.mosaicDiv :global(.mosaic-split.-row:hover) {
-    background: var(--background-light);
-    width: 4px;
-    z-index: 5;
-}
-
-.mosaicDiv :global(.mosaic-split.-column:hover) {
-    background: var(--background-light);
-    height: 4px;
-    z-index: 5;
-}*/
