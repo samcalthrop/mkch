@@ -10,7 +10,9 @@ export interface MarkovNode {
 
 export interface Arc {
   fromID: string;
+  fromLabel?: string;
   toID: string;
+  toLabel?: string;
   weight: number;
 }
 

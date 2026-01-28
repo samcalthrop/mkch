@@ -1,28 +1,28 @@
 import { useSharedData } from "@/components/SharedDataProvider/SharedDataProvider";
 import Table from "@/components/Table/Table/Table";
-import { ColumnDefinitionType, MarkovNode } from "@/types";
+import { Arc, ColumnDefinitionType } from "@/types";
 import classes from "./StatesView.module.css";
 
 export const StatesView = (): JSX.Element => {
-  const { currentNodes } = useSharedData();
-  const columns: ColumnDefinitionType<MarkovNode, keyof MarkovNode>[] = [
+  const { currentArcs } = useSharedData();
+  const columns: ColumnDefinitionType<Arc, keyof Arc>[] = [
     {
-      key: 'label',
-      header: 'State',
+      key: 'fromLabel',
+      header: 'From',
     },
     {
-      key: 'position',
-      header: 'Position',
+      key: 'toLabel',
+      header: 'To',
     },
     {
-      key: 'id',
-      header: 'id'
+      key: 'weight',
+      header: 'Weight'
     }
   ]
 
   return (
     <div className={classes.tableContainer}>
-      <Table data={currentNodes ?? []} columns={columns} />
+      <Table data={currentArcs ?? []} columns={columns} />
     </div>
   )
 };

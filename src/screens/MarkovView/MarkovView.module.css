@@ -1,7 +1,7 @@
 :root {
     --node-colour: var(--background-light);
     --node-text-colour: var(--background-lightest);
-    --arc-colour: var(--background-lighter);
+    --arc-colour: var(--muted);
     --node-selected-colour: var(--primary-foreground);
     --node-text-selected-colour: var(--primary);
     --node-arc-width: 2;
@@ -11,6 +11,8 @@
     --arrow-radius: 15;
     --node-border-radius: 8;
     --title-opacity: 1;
+    --canvas-text-spacing: 34;
+    --quadratic-offset: 60;
 }
 
 .base {

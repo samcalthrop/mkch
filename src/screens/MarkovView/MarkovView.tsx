@@ -1,12 +1,13 @@
+
+// TODO:
+// turn nodes array into a set for faster lookup of id
+
 import classes from "./MarkovView.module.css";
 import { Arc, Coord2D, DraggingArcProps, MarkovNode } from "../../types";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AddIcon from "../../assets/plus.svg?react";
 import { useSharedData } from "@/components/SharedDataProvider";
-
-// TODO:
-// turn nodes array into a set for faster lookup of id
 
 // const initialNodes: Map<string, Node> = new Map<string, Node>();
 const initialNodes: Array<MarkovNode> = [];
@@ -27,6 +28,7 @@ export const MarkovView = (): JSX.Element => {
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationFrameId = useRef<number>();
   const nodesRef = useRef<Array<MarkovNode>>([...initialNodes]);
+  const arcsRef = useRef<Array<Arc>>([...initialArcs]);
   const [mode, setMode] = useState('edit');
   const [selectedNode, setSelectedNode] = useState<MarkovNode | null>(null);
   const [draggedNode, setDraggedNode] = useState<string | null>(null);
@@ -63,10 +65,13 @@ export const MarkovView = (): JSX.Element => {
         ...safePrev,
         {
           fromID: arc.fromID,
+          fromLabel: arc.fromLabel,
           toID: arc.toID,
+          toLabel: arc.toLabel,
           weight: arc.weight,
         },
       ];
+      arcsRef.current = newArcs;
       return newArcs;
     });
   }
@@ -74,7 +79,7 @@ export const MarkovView = (): JSX.Element => {
   // return node using ID
   const getNodeByID = (nodeId: string): MarkovNode => {
     currentNodes?.forEach((node) => {
-      if (node.id === nodeId) return node
+      if (node.id == nodeId) return node
     });
     return {
       id: "unknown",
@@ -107,6 +112,17 @@ export const MarkovView = (): JSX.Element => {
     },
     [nodeWidth]
   );
+
+  const isBidirectional = (arc: Arc): boolean => {
+    let numArcs = 0;
+    currentArcs?.forEach((currentArc) => {
+      if ((currentArc.fromID == arc.fromID || currentArc.fromID == arc.toID) &&
+        (currentArc.toID == arc.fromID || currentArc.toID == arc.toID) &&
+        currentArc.fromID != currentArc.toID) numArcs++;
+    });
+    if (numArcs == 2) return true;
+    return false;
+  }
 
   // generate random position within canvas
   const getRandomPosition = (existingNodes: Array<MarkovNode>, attempts = 1000): Coord2D => {
@@ -175,9 +191,11 @@ export const MarkovView = (): JSX.Element => {
     const titleOpacity: number = Number(computedStyle.getPropertyValue('--title-opacity')) || .6;
     const fontFamily: string = computedStyle.getPropertyValue('--node-font') || 'Fira Code';
     const fontWeight: number = Number(computedStyle.getPropertyValue('--node-font-weight')) || 700;
+    const textGap: number = Number(computedStyle.getPropertyValue('--canvas-text-spacing')) || 30;
+    const quadraticOffset: number = Number(computedStyle.getPropertyValue('--quadratic-offset')) || 30;
 
     // arc props
-    const arcColour: string = computedStyle.getPropertyValue('--muted') || 'oklch(0.6308 0.143 360)';
+    const arcColour: string = computedStyle.getPropertyValue('--arc-colour') || 'oklch(0.6308 0.143 360)';
     const arcWidth: number = parseInt(computedStyle.getPropertyValue('--node-arc-width')) || 2;
     const arrowRadius: number = Number(computedStyle.getPropertyValue('--arrow-radius')) || 15;
 
@@ -187,41 +205,89 @@ export const MarkovView = (): JSX.Element => {
     // batch similar operations
     ctx.strokeStyle = arcColour;
     ctx.lineWidth = arcWidth;
+    ctx.font = `${fontWeight} ${textSize} ${fontFamily}`;
+    ctx.textAlign = 'center';
 
-    // draw connections
+    // draw arcs + arrows + weights
+    // TODO: finish bidirectional logic:
+    // - curves
+    // - arrows
+    // - text
     ctx.beginPath();
     currentArcs?.forEach((arc) => {
       const fromNode = currentNodes?.find((node) => node.id === arc.fromID);
       const toNode = currentNodes?.find((node) => node.id === arc.toID);
-      if (fromNode && toNode) {
-        ctx.moveTo(fromNode.position.x, fromNode.position.y);
-        ctx.lineTo(toNode.position.x, toNode.position.y);
-        // draw arrows
-        let gamma = Math.atan((toNode.position.y - fromNode.position.y) / (toNode.position.x - fromNode.position.x));
-        let theta = 0;
-        let alpha = 0;
-        if (fromNode.position.x > toNode.position.x || (fromNode.position.y > toNode.position.y && fromNode.position.x > toNode.position.x)) gamma += Math.PI;
-        theta = 2 * Math.PI - gamma;
-        alpha = 5 * Math.PI / 4 - theta;
-        // '+ 5 * Math.cos(gamma)' etc. shifts the arrows slightly such that their centre aligns with the centre of the arcs, instead of the tip aligning
-        const xCentringFactor: number = 5 * Math.cos(gamma);
-        const yCentringFactor: number = 5 * Math.sin(gamma);
 
-        ctx.moveTo((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor, (fromNode.position.y + toNode.position.y) / 2 + yCentringFactor);
-        ctx.lineTo(((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor) + arrowRadius * Math.cos(alpha), ((fromNode.position.y + toNode.position.y) / 2 + yCentringFactor) + arrowRadius * Math.sin(alpha));
-        ctx.moveTo((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor, (fromNode.position.y + toNode.position.y) / 2 + yCentringFactor);
-        ctx.lineTo(((fromNode.position.x + toNode.position.x) / 2 + xCentringFactor) + arrowRadius * Math.sin(alpha), ((fromNode.position.y + toNode.position.y) / 2 + yCentringFactor) - arrowRadius * Math.cos(alpha));
+      if (fromNode && toNode) {
+        const fromX: number = fromNode.position.x;
+        const fromY: number = fromNode.position.y;
+        const toX: number = toNode.position.x;
+        const toY: number = toNode.position.y;
+        const dx: number = toX - fromX;
+        const dy: number = toY - fromY;
+        const midpoint: Coord2D = { x: fromX + dx / 2, y: fromY + dy / 2 };
+
+        const modulus: number = Math.hypot(dx, dy);
+        const normal: Coord2D = { x: dx / modulus, y: dy / modulus };
+        const invNormal: Coord2D = { x: -normal.y, y: normal.x };
+
+        let gamma: number = Math.atan((toY - fromY) / (toX - fromX));
+        if (fromX > toX || (fromY > toY && fromX > toX)) gamma += Math.PI;
+        const theta: number = 2 * Math.PI - gamma;
+        const alpha: number = 5 * Math.PI / 4 - theta;
+
+        ctx.fillStyle = nodeColour;
+        if (fromNode.id != toNode.id) {
+          if (isBidirectional(arc)) {
+            ctx.fillText(arc.weight.toString(), (midpoint.x + textGap * invNormal.x * 1.5), (midpoint.y + textGap * invNormal.y * 1.5));
+          } else {
+            ctx.fillText(arc.weight.toString(), midpoint.x, (midpoint.y + textGap));
+          }
+        } else {
+          ctx.fillText(arc.weight.toString(), fromX, fromY - 75 + textGap);
+        }
+
+        ctx.fillStyle = arcColour;
+        ctx.moveTo(fromX, fromY);
+
+        if (fromNode.id != toNode.id) {
+          if (isBidirectional(arc)) {
+            // draw curves for bidirectional arcs -----------------------------
+            ctx.quadraticCurveTo(midpoint.x + invNormal.x * quadraticOffset, midpoint.y + invNormal.y * quadraticOffset, toX, toY);
+            ctx.moveTo(fromX, fromY);
+          } else {
+            ctx.lineTo(toX, toY);
+          }
+          // draw arrows ----------------------------------------------------
+          // '+ 5 * Math.cos(gamma)' etc. shifts the arrows slightly such that their centre aligns with the centre of the arcs, instead of the tip aligning
+          let centringFactor: Coord2D = { x: 5 * Math.cos(gamma), y: 5 * Math.sin(gamma) };
+          if (isBidirectional(arc)) {
+            centringFactor = { x: centringFactor.x + quadraticOffset * invNormal.x * .5, y: centringFactor.y + quadraticOffset * invNormal.y * .5 };
+          }
+          ctx.moveTo(midpoint.x + centringFactor.x, midpoint.y + centringFactor.y);
+          ctx.lineTo((midpoint.x + centringFactor.x) + arrowRadius * Math.cos(alpha), (midpoint.y + centringFactor.y) + arrowRadius * Math.sin(alpha));
+          ctx.moveTo(midpoint.x + centringFactor.x, midpoint.y + centringFactor.y);
+          ctx.lineTo((midpoint.x + centringFactor.x) + arrowRadius * Math.sin(alpha), (midpoint.y + centringFactor.y) - arrowRadius * Math.cos(alpha));
+
+        } else if (fromNode.id == toNode.id) {
+          ctx.bezierCurveTo(fromX + 100, fromY - 100, fromX - 100, fromY - 100, toX, toY);
+          const ctxPos: Coord2D = { x: fromX - 2, y: fromY - 75 };
+
+          // draw arrows
+          ctx.moveTo(ctxPos.x, ctxPos.y);
+          ctx.lineTo(ctxPos.x + 10, ctxPos.y - 10);
+          ctx.moveTo(ctxPos.x, ctxPos.y);
+          ctx.lineTo(ctxPos.x + 10, ctxPos.y + 10);
+        }
       }
     });
     ctx.stroke();
 
     // batch text rendering
     ctx.fillStyle = nodeTextColour;
-    ctx.font = `${fontWeight} ${textSize} ${fontFamily}`;
-    ctx.textAlign = 'center';
     ctx.globalAlpha = titleOpacity;
     currentNodes?.forEach((node) => {
-      ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + 30);
+      ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + textGap);
     });
 
     // highlighting selected node's label
@@ -230,7 +296,7 @@ export const MarkovView = (): JSX.Element => {
       ctx.beginPath();
       currentNodes?.forEach((node) => {
         if (node.id === selectedNode.id) {
-          ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + 30);
+          ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + textGap);
         }
       });
     }
@@ -496,12 +562,17 @@ export const MarkovView = (): JSX.Element => {
     selectedNodeRef.current = selectedNode;
   }, [selectedNode]);
 
-  // keep nodesRef in sync with nodes state
+  // keep nodesRef, arcsRef in sync with nodes, arcs state
   useEffect(() => {
     nodesRef.current = currentNodes ?? [];
   }, [currentNodes]);
 
+  useEffect(() => {
+    arcsRef.current = currentArcs ?? [];
+  }, [currentArcs]);
+
   // handle dragging arcs
+  // TODO: use sets instead of arrays for nodes and arcs to prevent duplicates
   useEffect(() => {
     handleGlobalMouseUpRef.current = (e: MouseEvent): void => {
       const rect = canvasRef.current?.getBoundingClientRect();
@@ -526,12 +597,31 @@ export const MarkovView = (): JSX.Element => {
           (node) => Math.sqrt(Math.pow(node.position.x - x, 2) + Math.pow(node.position.y - y, 2)) < (nodeHitboxRadius ?? 40)
         );
 
-        if (targetNode && targetNode.id !== currentDraggingArc.fromID) {
-          addArc({
-            fromID: currentDraggingArc.fromID,
-            toID: targetNode.id,
-            weight: 0,
+        if (targetNode) {
+          let hasCycle: boolean = false;
+          currentArcs?.forEach((arc) => {
+            if (arc.fromID == targetNode.id && arc.fromID == targetNode.id) hasCycle = true;
           });
+          let hasBidirection = false;
+          // turning arrays into sets here will save much time
+          targetNode.nodes_in.forEach((nodeA) => {
+            targetNode.nodes_out.forEach((nodeB) => {
+              if (nodeA.id == nodeB.id) hasBidirection = true;
+            })
+          })
+          let arcExists = targetNode.nodes_in.includes(getNodeByID(currentDraggingArc.fromID));
+
+          if ((((currentDraggingArc.fromID == targetNode.id) && !(hasCycle)) ||
+            !(hasBidirection)) &&
+            !(arcExists)) {
+            addArc({
+              fromID: currentDraggingArc.fromID,
+              fromLabel: getNodeByID(currentDraggingArc.fromID).label,
+              toID: targetNode.id,
+              toLabel: targetNode.label,
+              weight: 0,
+            });
+          }
         }
         setDraggingArc(null);
         draggingArcRef.current = null;
