@@ -2,6 +2,33 @@ import { MarkovView } from "../MarkovView";
 import { StatesView } from "../StatesView";
 import { ResizableBox } from "@/components/ResizableBox";
 import classes from "./ProjectView.module.css";
+import { GraphView } from "../GraphView/GraphView";
+import { invoke } from '@tauri-apps/api/core';
+import { MarkovMatrix } from "@/types";
+
+invoke('print_ln_on_backend');
+
+const state: MarkovMatrix = {
+  arr: [1, 0],
+  width: 1,
+  height: 2,
+}
+const matrix: MarkovMatrix = {
+  arr: [.5, .1, .5, .9],
+  width: 2,
+  height: 2,
+}
+
+try {
+  const result: MarkovMatrix = await invoke<MarkovMatrix>('get_steady_state_result', {
+    graph_matrix: matrix,
+    state_matrix: state,
+    max_iterations: 1000
+  });
+  console.log(result);
+} catch (e) {
+  console.error(e);
+}
 
 export const ProjectView = (): JSX.Element => {
   const startResize = (
@@ -104,7 +131,7 @@ export const ProjectView = (): JSX.Element => {
 
         <div className={classes.graphBox}>
           <ResizableBox title="Graph" >
-            <></>
+            <GraphView />
           </ResizableBox>
         </div>
       </div>

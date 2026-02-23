@@ -26,6 +26,33 @@ export interface DraggingArcProps {
   toPos: Coord2D;
 }
 
+// backend communicated data
+// requires snake_case for variable names
+
+// pub struct Matrix {
+//   pub arr: Vec<f64>,
+//   pub width: usize,
+//   pub height: usize,
+//   pub is_square: bool,
+// } :
+
+export interface MarkovMatrix {
+  arr: Array<Number>;
+  width: Number;
+  height: Number;
+}
+
+// #[derive(Debug)]
+// pub struct MatrixError {
+//   pub error_code: usize,
+//   pub reason: String,
+// } :
+
+export interface MatrixError {
+  error_code: Number;
+  reason: String;
+}
+
 // layout props ---------------------------------------------------------------
 
 export type BoxViewProps = {
@@ -71,6 +98,7 @@ export type ColumnDefinitionType<T, K extends keyof T> = {
 export type TableProps<T, K extends keyof T> = {
   data: Array<T>;
   columns: Array<ColumnDefinitionType<T, K>>;
+  onCellChange?: (params: { rowIndex: number; columnKey: K; value: string; }) => void;
 }
 
 export type TableHeaderProps<T, K extends keyof T> = {
@@ -80,4 +108,12 @@ export type TableHeaderProps<T, K extends keyof T> = {
 export type TableRowsProps<T, K extends keyof T> = {
   data: Array<T>;
   columns: Array<ColumnDefinitionType<T, K>>;
+  onCellChange?: (params: { rowIndex: number; columnKey: K; value: string; }) => void;
 }
+
+// export type CellTextBoxProps<T, K extends keyof T> = {
+//   rowIndex: number;
+//   columnKey: K;
+//   value: string;
+//   row: T;
+// }

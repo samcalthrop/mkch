@@ -78,10 +78,7 @@ export const MarkovView = (): JSX.Element => {
 
   // return node using ID
   const getNodeByID = (nodeId: string): MarkovNode => {
-    currentNodes?.forEach((node) => {
-      if (node.id == nodeId) return node
-    });
-    return {
+    const unknownNode: MarkovNode = {
       id: "unknown",
       label: "unknown",
       position: { x: 0, y: 0 },
@@ -89,6 +86,11 @@ export const MarkovView = (): JSX.Element => {
       nodes_out: [],
       radius: 15,
     }
+    const nodes = nodesRef.current;
+    if (!nodes?.length) {
+      return unknownNode;
+    }
+    return nodes.find(n => n.id === nodeId) ?? unknownNode;
   };
 
   // return nodes connected by arc
@@ -236,7 +238,7 @@ export const MarkovView = (): JSX.Element => {
         const theta: number = 2 * Math.PI - gamma;
         const alpha: number = 5 * Math.PI / 4 - theta;
 
-        ctx.fillStyle = nodeColour;
+        ctx.fillStyle = nodeTextColour;
         if (fromNode.id != toNode.id) {
           if (isBidirectional(arc)) {
             ctx.fillText(arc.weight.toString(), (midpoint.x + textGap * invNormal.x * 1.5), (midpoint.y + textGap * invNormal.y * 1.5));
@@ -525,6 +527,9 @@ export const MarkovView = (): JSX.Element => {
           return newNodes;
         });
       }
+
+      console.log("currentNodes: ", currentNodes?.length);
+      console.log("nodesRef: ", nodesRef.current.length);
 
       // update canvas to draw the dragging connection by mouse, and assign it a new position internally
       const currentDraggingArc = draggingArcRef.current;

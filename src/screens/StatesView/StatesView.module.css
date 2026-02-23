@@ -1,5 +1,71 @@
 .tableContainer {
-    /*border: 1px solid #d0d7de;*/
-    border-radius: 6px;
-    /*background: #ffffff;*/
+  /*border: 1px solid #d0d7de;*/
+  border-radius: 6px;
+  /*background: #ffffff;*/
+}
+
+/* table styles */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+  color: var(--background-lightest);
+  /*font-weight: var(--font-weight-bold);*/
+}
+
+/* table row styles */
+
+.tableRow {
+  /*width: 100%;*/
+}
+
+.tableRow:hover {
+  background-color: var(--muted);
+}
+
+.tableRow:nth-child(odd) {
+  background-color: var(--table-dark);
+}
+
+.tableRow:nth-child(even) {
+  background-color: var(--table-light);
+}
+
+.tableData .cellDataInput {
+  padding: 8px 16px;
+  text-align: center;
+  font-family: Lilex;
+  /*width: clamp(70%, 100%, 100%);*/
+  /*border-bottom: 1px solid var(--table-light);*/
+}
+
+.cellDataInput {
+  width: clamp(50%, 100%, 100%);
+}
+
+.cellDataInput:focus {
+  outline: none;
+}
+
+.tableBody {
+  background: var(--background-light);
+}
+
+/* table header styles */
+
+.tableHeader {
+  padding: 8px 16px;
+  text-align: center;
+  border-bottom: 2px solid var(--background-light);
+  font-weight: var(--font-weight-bold);
+  font-family: Lilex;
+}
+
+.tHead {
+  /*background: var(--background-lighter);*/
+}
+
+.outerTableHeader {
+  /*background-color: white;*/
 }

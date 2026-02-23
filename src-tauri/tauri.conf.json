@@ -11,12 +11,11 @@
     "removeUnusedCommands": true
   },
   "app": {
-    "windows": [
-
-    ],
+    "windows": [],
     "security": {
       "csp": null
-    }
+    },
+    "withGlobalTauri": true
   },
   "bundle": {
     "active": true,
