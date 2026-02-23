@@ -1,128 +1,113 @@
 /* MY COLOURS */
 :root {
-    --base-hue: 240;
-    --base-sat: 0%;
-    --base: hsl(var(--base-hue), var(--base-sat), 12%);
-    --base-light: hsl(var(--base-hue), var(--base-sat), 14%);
-    --base-lighter: hsl(var(--base-hue), var(--base-sat), 30%);
-    --base-dark: hsl(var(--base-hue), var(--base-sat), 10%);
-    --base-darker: hsl(var(--base-hue), var(--base-sat), 8%);
+  --base-hue: 240;
+  --base-sat: 0%;
+  --base: hsl(var(--base-hue), var(--base-sat), 12%);
+  --base-light: hsl(var(--base-hue), var(--base-sat), 14%);
+  --base-lighter: hsl(var(--base-hue), var(--base-sat), 30%);
+  --base-dark: hsl(var(--base-hue), var(--base-sat), 10%);
+  --base-darker: hsl(var(--base-hue), var(--base-sat), 8%);
 
-    --box-titlebar-height: 24px;
-    --left: 60%;
-    --right-inner: 50%;
-    --top: 50%;
+  --box-titlebar-height: 24px;
+  --left: 60%;
+  --right-inner: 50%;
+  --top: 50%;
 }
 
 .primaryContainer {
-    min-height: 0;
-    display: grid;
-    height: calc(100vh - var(--titlebar-height));
-    width: 100%;
-    background-color: var(--background-lighter);
-    grid-template-columns: clamp(10%, var(--left), 60%) 1px 1fr;
+  min-height: 0;
+  display: grid;
+  height: calc(100vh - var(--titlebar-height));
+  width: 100%;
+  background-color: var(--background-darkest);
+  grid-template-columns: clamp(10%, var(--left), 60%) 1px 1fr;
+  border-top: var(--border-style);
 }
 
 .secondaryContainer {
-    min-height: 0;
-    display: grid;
-    height: 100%;
-    grid-template-columns: 1fr;
-    grid-template-rows: clamp(30%, var(--top), 70%) 1px 1fr;
+  min-height: 0;
+  display: grid;
+  height: 100%;
+  grid-template-columns: 1fr;
+  grid-template-rows: clamp(30%, var(--top), 70%) 1px 1fr;
+  border-left: var(--border-style);
 }
 
 .tertiaryContainer {
-    min-height: 0;
-    display: grid;
-    width: 100%;
-    background-color: var(--background-lighter);
-    grid-template-columns: clamp(30%, var(--right-inner), 70%) 1px 1fr;
-    grid-template-rows: 1fr;
+  min-height: 0;
+  display: grid;
+  width: 100%;
+  background-color: var(--background-darkest);
+  grid-template-columns: clamp(30%, var(--right-inner), 70%) 1px 1fr;
+  grid-template-rows: 1fr;
+  border-bottom: var(--border-style);
 }
 
 .primaryContainer>*,
 .secondaryContainer>*,
 .tertiaryContainer>* {
-    min-height: 0;
+  min-height: 0;
 }
 
 .chainBox {
-    background-color: var(--background);
-    height: 100%;
-    border-left: 2px solid var(--background-light);
-    border-top: 2px solid var(--background-light);
-    border-bottom: 2px solid var(--background-light);
-    border-radius: 8px;
+  background-color: var(--background-darkest);
+  height: 100%;
 }
 
 .statesBox {
-    background-color: var(--background);
-    border-left: 2px solid var(--background-light);
-    border-top: 2px solid var(--background-light);
-    border-right: 2px solid var(--background-light);
-    border-bottom: 2px solid var(--background-light);
-    border-radius: 8px;
+  background-color: var(--background-darkest);
 }
 
 .controlsBox {
-    background-color: var(--background);
-    border-top: 2px solid var(--background-light);
-    border-right: 2px solid var(--background-light);
-    border-bottom: 2px solid var(--background-light);
-    border-radius: 8px;
+  background-color: var(--background-darkest);
+  border-left: var(--border-style);
 }
 
 .graphBox {
-    background-color: var(--background);
-    border-left: 2px solid var(--background-light);
-    border-top: 2px solid var(--background-light);
-    border-right: 2px solid var(--background-light);
-    border-bottom: 2px solid var(--background-light);
-    border-radius: 8px;
+  background-color: var(--background-darkest);
 }
 
 .resizeVertical {
-    background: transparent;
-    z-index: 10;
-    cursor: col-resize;
-    width: 10px;
-    left: var(--left);
-    top: var(--titlebar-height);
-    bottom: 0;
+  background: transparent;
+  z-index: 10;
+  cursor: col-resize;
+  width: 10px;
+  left: var(--left);
+  top: var(--titlebar-height);
+  bottom: 0;
 }
 
 .resizeVertical:hover {
-    width: 5px;
-    background-color: var(--background-lighter);
+  width: 5px;
+  background-color: var(--background-light);
 }
 
 .resizeHorizontal {
-    background: transparent;
-    z-index: 10;
-    cursor: row-resize;
-    height: 2px;
-    top: calc(var(--top) + 14px);
-    left: var(--left);
-    right: 0;
-    background-color: var(--background-light);
+  background: transparent;
+  z-index: 10;
+  cursor: row-resize;
+  height: 2px;
+  top: calc(var(--top) + 14px);
+  left: var(--left);
+  right: 0;
 }
 
 .resizeHorizontal:hover {
-    height: 5px;
-    background-color: var(--background-lighter);
+  height: 5px;
+  background-color: var(--background-light);
 }
 
 .resizeVerticalInner {
-    background: transparent;
-    z-index: 10;
-    cursor: col-resize;
-    width: 10px;
-    left: calc(var(--left) + calc(var(--right-inner) * var(--left)));
-    top: var(--titlebar-height);
-    bottom: calc(var(--top) - 14px);
+  background: transparent;
+  z-index: 10;
+  cursor: col-resize;
+  width: 10px;
+  left: calc(var(--left) + calc(var(--right-inner) * var(--left)));
+  top: var(--titlebar-height);
+  bottom: calc(var(--top) - 14px);
 }
 
 .resizeVerticalInner:hover {
-    width: 5px;
-    background-color: var(--background-lighter);
+  width: 5px;
+  background-color: var(--background-light);
 }

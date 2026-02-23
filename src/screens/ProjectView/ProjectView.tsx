@@ -9,12 +9,14 @@ import { MarkovMatrix } from "@/types";
 invoke('print_ln_on_backend');
 
 const state: MarkovMatrix = {
-  arr: [1, 0],
+  statesArr: ["State A", "State B"],
+  weightsArr: [1, 0],
   width: 1,
   height: 2,
 }
 const matrix: MarkovMatrix = {
-  arr: [.5, .1, .5, .9],
+  statesArr: ["State A", "State B"],
+  weightsArr: [.5, .1, .5, .9],
   width: 2,
   height: 2,
 }
@@ -85,7 +87,7 @@ export const ProjectView = (): JSX.Element => {
   return (
     <div className={classes.primaryContainer}>
       <div className={classes.chainBox}>
-        <ResizableBox title="Chain">
+        <ResizableBox title="chain">
           <MarkovView />
         </ResizableBox>
       </div>
@@ -101,7 +103,7 @@ export const ProjectView = (): JSX.Element => {
       <div className={classes.secondaryContainer}>
         <div className={classes.tertiaryContainer}>
           <div className={classes.statesBox}>
-            <ResizableBox title="States">
+            <ResizableBox title="states">
               <StatesView />
             </ResizableBox>
           </div>
@@ -115,7 +117,7 @@ export const ProjectView = (): JSX.Element => {
           />
 
           <div className={classes.controlsBox}>
-            <ResizableBox title="Controls">
+            <ResizableBox title="controls">
               <></>
             </ResizableBox>
           </div>
@@ -130,7 +132,7 @@ export const ProjectView = (): JSX.Element => {
         />
 
         <div className={classes.graphBox}>
-          <ResizableBox title="Graph" >
+          <ResizableBox title="graph" >
             <GraphView />
           </ResizableBox>
         </div>

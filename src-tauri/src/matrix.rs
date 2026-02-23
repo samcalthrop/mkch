@@ -2,9 +2,10 @@ use crate::types::{GraphDataPoint, Matrix, MatrixError, EPSILON};
 
 impl Matrix {
   // OK
-  pub fn new(arr: Vec<f64>, height: usize, width: usize) -> Self {
+  pub fn new(states_arr: Vec<String>, weights_arr: Vec<f64>, height: usize, width: usize) -> Self {
     Self {
-      arr,
+      states_arr,
+      weights_arr,
       width: width,
       height: height,
       // is_square: height == width,
@@ -18,13 +19,13 @@ impl Matrix {
 
   // OK
   pub fn get(&self, row: usize, col: usize) -> f64 {
-    self.arr[self.index(row, col)]
+    self.weights_arr[self.index(row, col)]
   }
 
   // OK
   fn set(&mut self, row: usize, col: usize, val: f64) {
     let i = self.index(row, col);
-    self.arr[i] = val;
+    self.weights_arr[i] = val;
   }
 
   // OK
@@ -38,7 +39,12 @@ impl Matrix {
       let result_width: usize = m2.width;
       let result_height: usize = m1.height;
       let result_array: Vec<f64> = vec![0.0; result_width * result_height];
-      let mut result: Matrix = Matrix::new(result_array, result_height, result_width);
+      let mut result: Matrix = Matrix::new(
+        m1.states_arr.clone(),
+        result_array,
+        result_height,
+        result_width,
+      );
       let mut temp: f64 = 0.0;
       // iterate through m1 rows
       for row1 in 0..m1.height {
@@ -66,7 +72,12 @@ impl Matrix {
         reason: "Dimension Error: Matrices must have same dimensions to be added.".into(),
       });
     } else {
-      let mut result: Matrix = Matrix::new(vec![0.0; width * height], height, width);
+      let mut result: Matrix = Matrix::new(
+        m1.states_arr.clone(),
+        vec![0.0; width * height],
+        height,
+        width,
+      );
       for row in 0..m1.height {
         for column in 0..m1.width {
           result.set(row, column, m1.get(row, column) + m2.get(row, column));
@@ -86,7 +97,12 @@ impl Matrix {
         reason: "Dimension Error: Matrices must have same dimensions to be added.".into(),
       });
     } else {
-      let mut result: Matrix = Matrix::new(vec![0.0; width * height], height, width);
+      let mut result: Matrix = Matrix::new(
+        m1.states_arr.clone(),
+        vec![0.0; width * height],
+        height,
+        width,
+      );
       for row in 0..m1.height {
         for column in 0..m1.width {
           result.set(row, column, m1.get(row, column) - m2.get(row, column));
@@ -135,7 +151,7 @@ impl Matrix {
         // calculate deltas
         let mut flag: bool = true;
         for i in 0..self.height {
-          if (next_state.arr[i] - state_matrix.arr[i]).abs() > tolerance {
+          if (next_state.weights_arr[i] - state_matrix.weights_arr[i]).abs() > tolerance {
             flag = false;
           }
           // data[i] = {};
@@ -152,9 +168,9 @@ impl Matrix {
   // OK
   pub fn log(&self) {
     for i in 0..self.height {
-      print!("[ ");
+      print!("{} --> [ ", self.states_arr[i]);
       for j in 0..self.width {
-        print!("{} ", self.arr[self.index(i, j)]);
+        print!("{} ", self.weights_arr[self.index(i, j)]);
       }
       println!("]");
     }

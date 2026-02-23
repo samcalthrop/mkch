@@ -37,9 +37,10 @@ export interface DraggingArcProps {
 // } :
 
 export interface MarkovMatrix {
-  arr: Array<Number>;
-  width: Number;
-  height: Number;
+  statesArr: Array<string>; // name of each state
+  weightsArr: Array<number>; // weight of each arc
+  width: number; // width of matrix
+  height: number; // height of matrix
 }
 
 // #[derive(Debug)]
@@ -49,8 +50,8 @@ export interface MarkovMatrix {
 // } :
 
 export interface MatrixError {
-  error_code: Number;
-  reason: String;
+  error_code: number;
+  reason: string;
 }
 
 // layout props ---------------------------------------------------------------

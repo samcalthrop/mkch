@@ -20,6 +20,12 @@ initialNodes.push(n2);
 const arc1: Arc = { toID: "n2", fromID: "n1", weight: 0 };
 const initialArcs: Arc[] = [arc1];
 
+export const findArc = (n1: MarkovNode, n2: MarkovNode, arcs: Array<Arc>) => {
+  return arcs.find((arc) => {
+    (arc.fromID === n1.id && arc.toID === n2.id);
+  })
+}
+
 export const MarkovView = (): JSX.Element => {
   const nodeWidth = 40;
   const nodeHeight = 30;
@@ -528,9 +534,6 @@ export const MarkovView = (): JSX.Element => {
         });
       }
 
-      console.log("currentNodes: ", currentNodes?.length);
-      console.log("nodesRef: ", nodesRef.current.length);
-
       // update canvas to draw the dragging connection by mouse, and assign it a new position internally
       const currentDraggingArc = draggingArcRef.current;
       if (currentDraggingArc) {
@@ -624,7 +627,7 @@ export const MarkovView = (): JSX.Element => {
               fromLabel: getNodeByID(currentDraggingArc.fromID).label,
               toID: targetNode.id,
               toLabel: targetNode.label,
-              weight: 0,
+              weight: 1,
             });
           }
         }

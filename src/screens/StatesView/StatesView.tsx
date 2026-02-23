@@ -1,10 +1,10 @@
 import { useSharedData } from "@/components/SharedDataProvider/SharedDataProvider";
-import { Arc, ColumnDefinitionType } from "@/types";
+import { Arc } from "@/types";
 import classes from "./StatesView.module.css";
 // import Table from "@/components/Table/Table";
 
 export const StatesView = (): JSX.Element => {
-  const { currentArcs, setCurrentArcs, currentNodes, setCurrentNodes } = useSharedData();
+  const { currentArcs, setCurrentArcs, setCurrentNodes } = useSharedData();
   // const columns: ColumnDefinitionType<Arc, keyof Arc>[] = [
   //   {
   //     key: 'fromLabel',

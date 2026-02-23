@@ -1,15 +1,33 @@
 :root {
-    --titlebar-height: 30px;
-    --traffic-lights-width: 72px;
+  --titlebar-height: 30px;
+  --traffic-lights-width: 72px;
 }
 
 .titlebar {
-    height: var(--titlebar-height);
-    display: flex;
-    align-items: center;
-    padding-left: var(--traffic-lights-width);
-    user-select: none;
-    background-color: var(--background-lighter);
+  height: var(--titlebar-height);
+  display: flex;
+  align-items: center;
+  padding-left: var(--traffic-lights-width);
+  user-select: none;
+  background-color: var(--background-darkest);
+  border-bottom: 1px var(--background-lightest);
+}
+
+.appTitle {
+  width: 63px;
+}
+
+.pointer {
+  padding: none;
+  color: var(--background-lightest);
+}
+
+.projectPath {
+  padding-left: 10px;
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  color: var(--background-lightest);
+  font-weight: var(--font-weight-medium);
 }
 
 .titlebarContent {}
