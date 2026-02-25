@@ -63,7 +63,7 @@ body {
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 6px;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
@@ -96,16 +96,17 @@ body {
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
 
-  --font: Lilex, system-ui, verdana, inter, 'Mona Sans', Fira Code;
+  --font-family: Lilex, system-ui, verdana, inter, 'Mona Sans', Fira Code;
+  --font-sans: Lilex, system-ui, verdana, inter, 'Mona Sans', Fira Code;
   --titlebar-height: 30px;
   --traffic-lights-width: 72px;
-  --border-style: 1px solid var(--background-lighter);
+  --border-style: 1px solid var(--background-light);
 
   --background-darkest: oklch(0.020 var(--bg-chroma) var(--bg-hue));
   --background-darker: oklch(0.040 var(--bg-chroma) var(--bg-hue));
   --background-dark: oklch(0.080 var(--bg-chroma) var(--bg-hue));
   --background: oklch(0.130 var(--bg-chroma) var(--bg-hue));
-  --background-light: oklch(0.244 var(--bg-chroma) var(--bg-hue));
+  --background-light: oklch(0.230 var(--bg-chroma) var(--bg-hue));
   --background-lighter: oklch(0.270 var(--bg-chroma) var(--bg-hue));
   --background-lightest: oklch(0.400 var(--bg-chroma) var(--bg-hue));
 
@@ -123,8 +124,10 @@ body {
   --card-foreground: oklch(0.984 0.003 247.858);
   --popover: oklch(0.208 0.042 265.755);
   --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.493 0.1919 287.04);
-  --primary-foreground: oklch(0.6398 0.1919 287.04);
+  --primary: oklch(0.4589 0.2709 271.71);
+  --primary-dark: oklch(0.3589 0.2709 271.71);
+  --primary-foreground: white;
+  --primary-foreground-dark: oklch(0.8589 0.2709 271.71);
   --secondary: oklch(0.6308 0.143 360);
   --secondary-foreground: oklch(0.984 0.003 247.858);
   --muted: oklch(0.308 0.113 280.04);

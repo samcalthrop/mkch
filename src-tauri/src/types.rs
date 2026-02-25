@@ -46,7 +46,6 @@ pub struct GraphDataPoint {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Matrix {
-  pub states_arr: Vec<String>,
   pub weights_arr: Vec<f64>,
   pub width: usize,
   pub height: usize,

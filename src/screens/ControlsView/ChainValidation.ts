@@ -17,11 +17,11 @@ export const convertChainToMatrix = (nodes: Array<MarkovNode>, arcs: Array<Arc>)
     statesArr[statesIndex] = nodes[statesIndex].label ?? "unknown";
     statesIndex++;
   })
-  return { statesArr, weightsArr, width: nodes.length, height: nodes.length };
+  return { weightsArr, width: nodes.length, height: nodes.length };
 }
 
 export const validateChain = (matrix: MarkovMatrix) => {
-  if (matrix.statesArr.length === 0) return err({ reason: "no chain found" });
+  if (matrix.weightsArr.length === 0) return err({ reason: "no chain found" });
   // return error if no weights are above 0 (no arcs)
   // !! NOT TESTED
   if (matrix.weightsArr.every((weight) => weight === 0)) return err({ reason: "no arcs in chain" });

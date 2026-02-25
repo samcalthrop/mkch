@@ -30,14 +30,12 @@ export interface DraggingArcProps {
 // requires snake_case for variable names
 
 // pub struct Matrix {
-//   pub arr: Vec<f64>,
+//   pub weights_arr: Vec<f64>,
 //   pub width: usize,
 //   pub height: usize,
-//   pub is_square: bool,
 // } :
 
 export interface MarkovMatrix {
-  statesArr: Array<string>; // name of each state
   weightsArr: Array<number>; // weight of each arc
   width: number; // width of matrix
   height: number; // height of matrix
@@ -118,3 +116,10 @@ export type TableRowsProps<T, K extends keyof T> = {
 //   value: string;
 //   row: T;
 // }
+
+// controls types
+
+export type Controls = {
+  tolerance: number;
+  maxIterations: number;
+}

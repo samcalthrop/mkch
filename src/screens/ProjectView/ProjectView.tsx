@@ -5,17 +5,16 @@ import classes from "./ProjectView.module.css";
 import { GraphView } from "../GraphView/GraphView";
 import { invoke } from '@tauri-apps/api/core';
 import { MarkovMatrix } from "@/types";
+import { ControlsView } from "../ControlsView";
 
 invoke('print_ln_on_backend');
 
 const state: MarkovMatrix = {
-  statesArr: ["State A", "State B"],
   weightsArr: [1, 0],
   width: 1,
   height: 2,
 }
 const matrix: MarkovMatrix = {
-  statesArr: ["State A", "State B"],
   weightsArr: [.5, .1, .5, .9],
   width: 2,
   height: 2,
@@ -118,7 +117,7 @@ export const ProjectView = (): JSX.Element => {
 
           <div className={classes.controlsBox}>
             <ResizableBox title="controls">
-              <></>
+              <ControlsView />
             </ResizableBox>
           </div>
         </div>

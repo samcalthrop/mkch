@@ -2,7 +2,7 @@
   --node-colour: var(--background-light);
   --node-text-colour: var(--background-lightest);
   --arc-colour: var(--muted);
-  --node-selected-colour: var(--primary-foreground);
+  --node-selected-colour: var(--primary);
   --node-text-selected-colour: var(--primary);
   --node-arc-width: 2;
   --node-font: var(--font);
