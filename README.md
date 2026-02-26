@@ -3,7 +3,7 @@
 
 ## Current Snapshot:
 
-![current snapshot of app](/src/assets/current-snapshot)
+![current snapshot of app](/src/assets/current-snapshot.png)
 
 ## the plan
 
