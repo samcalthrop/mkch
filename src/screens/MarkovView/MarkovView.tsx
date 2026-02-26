@@ -3,7 +3,7 @@
 // turn nodes array into a set for faster lookup of id
 
 import classes from "./MarkovView.module.css";
-import { Arc, Coord2D, DraggingArcProps, MarkovNode } from "../../types";
+import { Arc, ArrowProps, Coord2D, DraggingArcProps, MarkovNode } from "../../types";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AddIcon from "../../assets/plus.svg?react";
@@ -27,9 +27,10 @@ export const findArc = (n1: MarkovNode, n2: MarkovNode, arcs: Array<Arc>) => {
 }
 
 export const MarkovView = (): JSX.Element => {
-  const nodeWidth = 40;
-  const nodeHeight = 30;
-  const nodeHitboxRadius = Math.sqrt(Math.pow(nodeWidth / 2, 2) + Math.pow(nodeHeight / 2, 2));
+  const NODE_WIDTH = 40;
+  const NODE_HEIGHT = 30;
+  const OUT_OF_SIGHT: Coord2D = { x: 2000, y: 2000 };
+  const nodeHitboxRadius = Math.sqrt(Math.pow(NODE_WIDTH / 2, 2) + Math.pow(NODE_HEIGHT / 2, 2));
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationFrameId = useRef<number>();
@@ -107,19 +108,39 @@ export const MarkovView = (): JSX.Element => {
     return nodeIdArray;
   };
 
+  const nodeExistsAtPoint = (x: number, y: number, existingNodes: Array<MarkovNode>): boolean => {
+    return !existingNodes.some(
+      /* performing pythagoras to check if the distance between the two nodes is less than
+     the minimum distance */
+      (node) => Math.sqrt(Math.pow(node.position.x - x, 2) + Math.pow(node.position.y - y, 2)) < NODE_WIDTH
+    );
+  };
+
   /* check if given position is valid (not overlapping with other nodes),
    memoising to optimise expensive calculations */
-  const isValidPosition = useCallback(
+  const nodeCanSpawnAtPoint = useCallback(
     (x: number, y: number, existingNodes: Array<MarkovNode>): boolean => {
-      const minDistance = 2 * (nodeWidth || 15);
+      const MIN_DISTANCE = 2 * (NODE_WIDTH || 15);
       return !existingNodes.some(
         /* performing pythagoras to check if the distance between the two nodes is less than
        the minimum distance */
-        (node) => Math.sqrt(Math.pow(node.position.x - x, 2) + Math.pow(node.position.y - y, 2)) < minDistance
+        (node) => Math.sqrt(Math.pow(node.position.x - x, 2) + Math.pow(node.position.y - y, 2)) < MIN_DISTANCE
       );
     },
-    [nodeWidth]
+    [NODE_WIDTH]
   );
+
+  // const arcExistsAtPoint = useCallback(
+  //   (x: number, y: number, existingArcs: Array<Arc>): boolean => {
+  //     const minDistance = 2 * (NODE_WIDTH || 15);
+  //     return !existingArcs.some(
+  //       /* performing pythagoras to check if the distance between the two nodes is less than
+  //      the minimum distance */
+  //       (arc) => Math.sqrt(Math.pow(getNodeByID(arc.fromID).position.x - x, 2) + Math.pow(node.position.y - y, 2)) < minDistance
+  //     );
+  //   },
+  //   [NODE_WIDTH]
+  // );
 
   const isBidirectional = (arc: Arc): boolean => {
     let numArcs = 0;
@@ -141,7 +162,7 @@ export const MarkovView = (): JSX.Element => {
     for (let i = 0; i < attempts; i++) {
       const x = Math.floor(padding + Math.random() * (canvas.width - 2 * padding));
       const y = Math.floor(padding + Math.random() * (canvas.height - 2 * padding));
-      if (isValidPosition(x, y, existingNodes)) {
+      if (nodeCanSpawnAtPoint(x, y, existingNodes)) {
         return { x, y };
       }
     }
@@ -179,6 +200,135 @@ export const MarkovView = (): JSX.Element => {
     );
   };
 
+  // Drawing functions --------------------------------------------------------
+
+  const drawArrow = (arrowProps: ArrowProps, ctx: CanvasRenderingContext2D) => {
+    switch (arrowProps.key) {
+      case "angular":
+      case "direct":
+        const { angle, arrowRadius, centringFactor, midpoint } = arrowProps;
+        ctx.moveTo(midpoint.x + centringFactor.x, midpoint.y + centringFactor.y);
+        ctx.lineTo((midpoint.x + centringFactor.x) + arrowRadius * Math.cos(angle), (midpoint.y + centringFactor.y) + arrowRadius * Math.sin(angle));
+        ctx.moveTo(midpoint.x + centringFactor.x, midpoint.y + centringFactor.y);
+        ctx.lineTo((midpoint.x + centringFactor.x) + arrowRadius * Math.sin(angle), (midpoint.y + centringFactor.y) - arrowRadius * Math.cos(angle));
+        break;
+      case "loop":
+        const { ctxPos } = arrowProps;
+        ctx.moveTo(ctxPos.x, ctxPos.y);
+        ctx.lineTo(ctxPos.x + 10, ctxPos.y - 10);
+        ctx.moveTo(ctxPos.x, ctxPos.y);
+        ctx.lineTo(ctxPos.x + 10, ctxPos.y + 10);
+        break;
+    }
+  };
+
+  const drawDraggingArc = (ctx: CanvasRenderingContext2D, nodes: Array<MarkovNode>, draggingArc: DraggingArcProps) => {
+    const ORIGINAL_FILL_STYLE = ctx.fillStyle;
+
+    const fromNode = nodes.find((node) => node.id === draggingArc.fromID);
+    if (fromNode) {
+      ctx.beginPath();
+      ctx.setLineDash([5, 5]);
+      ctx.moveTo(fromNode.position.x, fromNode.position.y);
+      ctx.lineTo(draggingArc.toPos.x, draggingArc.toPos.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.fillStyle = ORIGINAL_FILL_STYLE;
+  }
+
+  const drawWeights = (ctx: CanvasRenderingContext2D, fromNode: MarkovNode, toNode: MarkovNode, arc: Arc, midpoint: Coord2D, textGap: number, invNormal: Coord2D, nodeTextColour: string) => {
+    const ORIGINAL_FILL_STYLE = ctx.fillStyle;
+    ctx.fillStyle = nodeTextColour;
+    if (fromNode.id != toNode.id) {
+      if (isBidirectional(arc)) {
+        ctx.fillText(arc.weight.toString(), (midpoint.x + textGap * invNormal.x * 1.5), (midpoint.y + textGap * invNormal.y * 1.5));
+      } else {
+        ctx.fillText(arc.weight.toString(), midpoint.x, (midpoint.y + textGap));
+      }
+    } else {
+      ctx.fillText(arc.weight.toString(), fromNode.position.x, fromNode.position.y - 75 + textGap);
+    }
+    ctx.fillStyle = ORIGINAL_FILL_STYLE;
+  };
+
+  const drawNodeLabels = (ctx: CanvasRenderingContext2D, nodeTextColour: string, titleOpacity: number, nodes: Array<MarkovNode>, textGap: number) => {
+    const ORIGINAL_FILL_STYLE = ctx.fillStyle;
+    const ORIGINAL_ALPHA = ctx.globalAlpha;
+
+    ctx.fillStyle = nodeTextColour;
+    ctx.globalAlpha = titleOpacity;
+    nodes.forEach((node) => {
+      ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + textGap);
+    });
+
+    ctx.fillStyle = ORIGINAL_FILL_STYLE;
+    ctx.globalAlpha = ORIGINAL_ALPHA;
+  }
+
+  const drawSelectedNodeLabel = (ctx: CanvasRenderingContext2D, nodeTextColourSelected: string, selectedNode: MarkovNode, textGap: number) => {
+    const ORIGINAL_FILL_STYLE = ctx.fillStyle;
+
+    ctx.fillStyle = nodeTextColourSelected;
+    ctx.beginPath();
+    currentNodes?.forEach((node) => {
+      if (node.id === selectedNode.id) {
+        ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + textGap);
+      }
+    });
+
+    ctx.fillStyle = ORIGINAL_FILL_STYLE;
+  }
+
+  const drawRadialMouseBlur = (ctx: CanvasRenderingContext2D, mousePosition: Coord2D, canvasHeight: number, canvasWidth: number, blurColour: string) => {
+    const ORIGINAL_FILL_STYLE = ctx.fillStyle;
+    const ORIGINAL_ALPHA = ctx.globalAlpha;
+    const SMALL_RADIUS = 0;
+    const BIG_RADIUS = 200;
+
+    let radgrad = ctx.createRadialGradient(mousePosition.x, mousePosition.y, SMALL_RADIUS, mousePosition.x, mousePosition.y, BIG_RADIUS);
+    radgrad.addColorStop(1, 'transparent');
+    radgrad.addColorStop(0, blurColour);
+    ctx.fillStyle = radgrad;
+    ctx.globalAlpha = .21;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.fillStyle = ORIGINAL_FILL_STYLE;
+    ctx.globalAlpha = ORIGINAL_ALPHA;
+  }
+
+  const drawNode = (ctx: CanvasRenderingContext2D, node: MarkovNode, nodeWidth: number, nodeHeight: number, nodeBorderRadius: number) => {
+    ctx.roundRect(node.position.x - (nodeWidth / 2), node.position.y - (nodeHeight / 2), nodeWidth, nodeHeight, nodeBorderRadius);
+  };
+
+  const drawNodes = (ctx: CanvasRenderingContext2D, nodes: Array<MarkovNode>, nodeColour: string, nodeWidth: number, nodeHeight: number, nodeBorderRadius: number) => {
+    const ORIGINAL_FILL_STYLE = ctx.fillStyle;
+
+    ctx.fillStyle = nodeColour;
+    ctx.beginPath();
+    nodes.forEach((node) => {
+      drawNode(ctx, node, nodeWidth, nodeHeight, nodeBorderRadius);
+    });
+    ctx.fill();
+
+    ctx.fillStyle = ORIGINAL_FILL_STYLE;
+  };
+
+  const drawSelectedNode = (ctx: CanvasRenderingContext2D, nodes: Array<MarkovNode>, selectedNode: MarkovNode, selectedColour: string, nodeWidth: number, nodeHeight: number, nodeBorderRadius: number) => {
+    const ORIGINAL_FILL_STYLE = ctx.fillStyle;
+
+    ctx.fillStyle = selectedColour;
+    ctx.beginPath();
+    nodes.forEach((node) => {
+      if (node.id === selectedNode.id) {
+        drawNode(ctx, node, nodeWidth, nodeHeight, nodeBorderRadius);
+        ctx.fill();
+      }
+    });
+
+    ctx.fillStyle = ORIGINAL_FILL_STYLE;
+  };
+
   // canvas drawing function
   const draw = useCallback(() => {
     const ctx = contextRef.current;
@@ -208,7 +358,7 @@ export const MarkovView = (): JSX.Element => {
     const arrowRadius: number = Number(computedStyle.getPropertyValue('--arrow-radius')) || 15;
 
     // other / background
-    const blurColour: string = computedStyle.getPropertyValue('--primary') || 'oklch(0.244 0.025 264.695)';
+    const blurColour: string = computedStyle.getPropertyValue('--node-selected-colour') || 'oklch(0.244 0.025 264.695)';
 
     // batch similar operations
     ctx.strokeStyle = arcColour;
@@ -227,10 +377,8 @@ export const MarkovView = (): JSX.Element => {
       const toNode = currentNodes?.find((node) => node.id === arc.toID);
 
       if (fromNode && toNode) {
-        const fromX: number = fromNode.position.x;
-        const fromY: number = fromNode.position.y;
-        const toX: number = toNode.position.x;
-        const toY: number = toNode.position.y;
+        const { x: fromX, y: fromY } = fromNode.position;
+        const { x: toX, y: toY } = toNode.position;
         const dx: number = toX - fromX;
         const dy: number = toY - fromY;
         const midpoint: Coord2D = { x: fromX + dx / 2, y: fromY + dy / 2 };
@@ -239,120 +387,60 @@ export const MarkovView = (): JSX.Element => {
         const normal: Coord2D = { x: dx / modulus, y: dy / modulus };
         const invNormal: Coord2D = { x: -normal.y, y: normal.x };
 
-        let gamma: number = Math.atan((toY - fromY) / (toX - fromX));
-        if (fromX > toX || (fromY > toY && fromX > toX)) gamma += Math.PI;
-        const theta: number = 2 * Math.PI - gamma;
-        const alpha: number = 5 * Math.PI / 4 - theta;
+        let GAMMA: number = Math.atan((toY - fromY) / (toX - fromX));
+        if (fromX > toX || (fromY > toY && fromX > toX)) GAMMA += Math.PI;
+        const THETA: number = 2 * Math.PI - GAMMA;
+        const ALPHA: number = 5 * Math.PI / 4 - THETA;
 
-        ctx.fillStyle = nodeTextColour;
-        if (fromNode.id != toNode.id) {
-          if (isBidirectional(arc)) {
-            ctx.fillText(arc.weight.toString(), (midpoint.x + textGap * invNormal.x * 1.5), (midpoint.y + textGap * invNormal.y * 1.5));
-          } else {
-            ctx.fillText(arc.weight.toString(), midpoint.x, (midpoint.y + textGap));
-          }
-        } else {
-          ctx.fillText(arc.weight.toString(), fromX, fromY - 75 + textGap);
-        }
+        drawWeights(ctx, fromNode, toNode, arc, midpoint, textGap, invNormal, nodeTextColour);
 
-        ctx.fillStyle = arcColour;
         ctx.moveTo(fromX, fromY);
 
         if (fromNode.id != toNode.id) {
+          // shifts the arrows slightly such that their centre aligns with the centre of the arcs, instead of the tip of the arrow aligning
+          const ARROW_OFFSET: number = 5;
+          let centringFactor: Coord2D = { x: ARROW_OFFSET * Math.cos(GAMMA), y: ARROW_OFFSET * Math.sin(GAMMA) };
           if (isBidirectional(arc)) {
-            // draw curves for bidirectional arcs -----------------------------
             ctx.quadraticCurveTo(midpoint.x + invNormal.x * quadraticOffset, midpoint.y + invNormal.y * quadraticOffset, toX, toY);
             ctx.moveTo(fromX, fromY);
+            centringFactor = { x: centringFactor.x + quadraticOffset * invNormal.x * .5, y: centringFactor.y + quadraticOffset * invNormal.y * .5 };
+            drawArrow({ key: "angular", midpoint, centringFactor, arrowRadius, angle: ALPHA }, ctx);
           } else {
             ctx.lineTo(toX, toY);
+            drawArrow({ key: "direct", midpoint, centringFactor, arrowRadius, angle: ALPHA }, ctx);
           }
-          // draw arrows ----------------------------------------------------
-          // '+ 5 * Math.cos(gamma)' etc. shifts the arrows slightly such that their centre aligns with the centre of the arcs, instead of the tip aligning
-          let centringFactor: Coord2D = { x: 5 * Math.cos(gamma), y: 5 * Math.sin(gamma) };
-          if (isBidirectional(arc)) {
-            centringFactor = { x: centringFactor.x + quadraticOffset * invNormal.x * .5, y: centringFactor.y + quadraticOffset * invNormal.y * .5 };
-          }
-          ctx.moveTo(midpoint.x + centringFactor.x, midpoint.y + centringFactor.y);
-          ctx.lineTo((midpoint.x + centringFactor.x) + arrowRadius * Math.cos(alpha), (midpoint.y + centringFactor.y) + arrowRadius * Math.sin(alpha));
-          ctx.moveTo(midpoint.x + centringFactor.x, midpoint.y + centringFactor.y);
-          ctx.lineTo((midpoint.x + centringFactor.x) + arrowRadius * Math.sin(alpha), (midpoint.y + centringFactor.y) - arrowRadius * Math.cos(alpha));
-
         } else if (fromNode.id == toNode.id) {
           ctx.bezierCurveTo(fromX + 100, fromY - 100, fromX - 100, fromY - 100, toX, toY);
-          const ctxPos: Coord2D = { x: fromX - 2, y: fromY - 75 };
-
-          // draw arrows
-          ctx.moveTo(ctxPos.x, ctxPos.y);
-          ctx.lineTo(ctxPos.x + 10, ctxPos.y - 10);
-          ctx.moveTo(ctxPos.x, ctxPos.y);
-          ctx.lineTo(ctxPos.x + 10, ctxPos.y + 10);
+          drawArrow({ key: "loop", ctxPos: { x: fromX - 2, y: fromY - 75 } }, ctx);
         }
       }
     });
     ctx.stroke();
 
-    // batch text rendering
-    ctx.fillStyle = nodeTextColour;
-    ctx.globalAlpha = titleOpacity;
-    currentNodes?.forEach((node) => {
-      ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + textGap);
-    });
-
-    // highlighting selected node's label
-    if (selectedNode) {
-      ctx.fillStyle = nodeTextColourSelected;
-      ctx.beginPath();
-      currentNodes?.forEach((node) => {
-        if (node.id === selectedNode.id) {
-          ctx.fillText(node.label ?? "untitled", node.position.x, node.position.y + textGap);
-        }
-      });
-    }
-    ctx.globalAlpha = 1;
-
-    // radial blur gradient following mouse
-    let radgrad = ctx.createRadialGradient(mousePos.current?.x ?? -1000, mousePos.current?.y ?? -1000, 0, mousePos.current?.x ?? -1000, mousePos.current?.y ?? -1000, 200);
-    radgrad.addColorStop(1, 'transparent');
-    radgrad.addColorStop(0, blurColour);
-    ctx.fillStyle = radgrad;
-    ctx.globalAlpha = .15;
-    ctx.fillRect(0, 0, canvasRef.current?.width ?? 2000, canvasRef.current?.height ?? 2000);
-    ctx.globalAlpha = 1;
-
     if (mode == 'edit') {
       // draw dragging connection
       if (draggingArc) {
-        const fromNode = currentNodes?.find((node) => node.id === draggingArc.fromID);
-        if (fromNode) {
-          ctx.beginPath();
-          ctx.setLineDash([5, 5]);
-          ctx.moveTo(fromNode.position.x, fromNode.position.y);
-          ctx.lineTo(draggingArc.toPos.x, draggingArc.toPos.y);
-          ctx.stroke();
-          ctx.setLineDash([]);
-        }
+        drawDraggingArc(ctx, currentNodes ?? [], draggingArc);
       }
     }
 
+    // batch text rendering
+    drawNodeLabels(ctx, nodeTextColour, titleOpacity, currentNodes ?? [], textGap);
+
+    // highlighting selected node's label
+    if (selectedNode) {
+      drawSelectedNodeLabel(ctx, nodeTextColourSelected, selectedNode, textGap);
+    }
+
+    // radial blur gradient following mouse
+    drawRadialMouseBlur(ctx, mousePos.current ?? OUT_OF_SIGHT, canvasRef.current?.height ?? OUT_OF_SIGHT.x, canvasRef.current?.width ?? OUT_OF_SIGHT.y, blurColour);
+
     // batch node drawing
-    ctx.fillStyle = nodeColour;
-    ctx.beginPath();
-    currentNodes?.forEach((node) => {
-      // ctx.moveTo(node.position.x + (nodeHitboxRadius || 40), node.position.y);
-      ctx.roundRect(node.position.x - (nodeWidth / 2), node.position.y - (nodeHeight / 2), nodeWidth, nodeHeight, nodeBorderRadius);
-    });
-    ctx.fill();
+    drawNodes(ctx, currentNodes ?? [], nodeColour, NODE_WIDTH, NODE_HEIGHT, nodeBorderRadius);
 
     // drawing selected node
     if (selectedNode) {
-      ctx.fillStyle = selectedColour;
-      ctx.beginPath();
-      currentNodes?.forEach((node) => {
-        if (node.id === selectedNode.id) {
-          ctx.roundRect(node.position.x - (nodeWidth / 2), node.position.y - (nodeHeight / 2), nodeWidth, nodeHeight, nodeBorderRadius);
-          ctx.fill();
-        }
-      });
+      drawSelectedNode(ctx, currentNodes ?? [], selectedNode, selectedColour, NODE_WIDTH, NODE_HEIGHT, nodeBorderRadius);
     }
 
     // in the case that edit mode is on, these features are drawn
@@ -363,7 +451,8 @@ export const MarkovView = (): JSX.Element => {
     currentNodes,
     currentArcs,
     draggingArc,
-    nodeWidth,
+    NODE_WIDTH,
+    NODE_HEIGHT,
     mode,
     selectedNode,
   ]);
@@ -393,17 +482,17 @@ export const MarkovView = (): JSX.Element => {
       ) / lengthAB;
 
     // calculate angle between line AB and the horizontal
-    const theta = Math.atan((nodeB.y - nodeA.y) / (nodeB.x - nodeA.x));
+    const THETA = Math.atan((nodeB.y - nodeA.y) / (nodeB.x - nodeA.x));
 
     const distFromA = Math.pow(nodeA.x - x, 2) + Math.pow(nodeA.y - y, 2);
     const distFromB = Math.pow(nodeB.x - x, 2) + Math.pow(nodeB.y - y, 2);
 
     return (
       perpDistance < 10 && // within 10px of the line
-      x >= Math.min(nodeA.x, nodeB.x) + (nodeHitboxRadius || 15) * Math.cos(theta) && // click is within line segment, the node's radius
-      x <= Math.max(nodeA.x, nodeB.x) - (nodeHitboxRadius || 15) * Math.cos(theta) &&
-      y >= Math.min(nodeA.y, nodeB.y) - (nodeHitboxRadius || 15) * Math.sin(theta) &&
-      y <= Math.max(nodeA.y, nodeB.y) + (nodeHitboxRadius || 15) * Math.sin(theta) &&
+      x >= Math.min(nodeA.x, nodeB.x) + (nodeHitboxRadius || 15) * Math.cos(THETA) && // click is within line segment, the node's radius
+      x <= Math.max(nodeA.x, nodeB.x) - (nodeHitboxRadius || 15) * Math.cos(THETA) &&
+      y >= Math.min(nodeA.y, nodeB.y) - (nodeHitboxRadius || 15) * Math.sin(THETA) &&
+      y <= Math.max(nodeA.y, nodeB.y) + (nodeHitboxRadius || 15) * Math.sin(THETA) &&
       distFromA > nodeHitboxRadius && distFromB > nodeHitboxRadius
     );
   };
@@ -515,10 +604,10 @@ export const MarkovView = (): JSX.Element => {
       if (!canvas) return;
 
       // Constrain node position to canvas bounds
-      const minX = nodeWidth / 2;
-      const maxX = canvas.width - nodeWidth / 2;
-      const minY = nodeHeight / 2;
-      const maxY = canvas.height - nodeHeight / 2;
+      const minX = NODE_WIDTH / 2;
+      const maxX = canvas.width - NODE_WIDTH / 2;
+      const minY = NODE_HEIGHT / 2;
+      const maxY = canvas.height - NODE_HEIGHT / 2;
 
       x = Math.max(minX, Math.min(maxX, x));
       y = Math.max(minY, Math.min(maxY, y));
@@ -542,7 +631,7 @@ export const MarkovView = (): JSX.Element => {
         draggingArcRef.current = { ...currentDraggingArc, toPos: { x, y } };
       }
     };
-  }, [handleMousePosition, nodeWidth, nodeHeight]);
+  }, [handleMousePosition, NODE_WIDTH, NODE_HEIGHT]);
 
   const handleGlobalMouseMove = useCallback((e: MouseEvent): void => {
     // Process immediately without throttling to ensure smooth dragging
@@ -557,8 +646,16 @@ export const MarkovView = (): JSX.Element => {
       handleGlobalMouseMove(e.nativeEvent);
       const { offsetX, offsetY } = e.nativeEvent;
       mousePos.current = { x: offsetX, y: offsetY };
+
+      const { x, y } = handleMousePosition(e.clientX, e.clientY);
+
+      const hoveringNode = nodeExistsAtPoint(x, y, currentNodes ?? []);
+      // const hoveringArc = getArcAtPosition(x, y)
+      if (canvasRef.current) {
+        canvasRef.current.style.cursor = hoveringNode ? "default" : "pointer";
+      }
     },
-    [handleGlobalMouseMove]
+    [handleGlobalMouseMove, currentNodes, nodeExistsAtPoint]
   );
 
   const handleMouseLeave = useCallback(() => {

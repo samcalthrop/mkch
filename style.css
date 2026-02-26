@@ -6,6 +6,11 @@
   src: url("./src/assets/fonts/Lilex/variable/Lilex[wght].ttf");
 }
 
+@font-face {
+  font-family: "CommitMono";
+  src: url("./src/assets/fonts/CommitMonoV143/CommitMono\ VariableFont.woff2");
+}
+
 html,
 body {
   overscroll-behavior: none;
@@ -14,6 +19,17 @@ body {
 }
 
 @custom-variant dark (&:is(.dark *));
+
+*::selection {
+  background-color: transparent;
+  color: var(--off-white);
+  /*text-shadow: 0px 0px 10px var(--primary-dark);*/
+}
+
+*::-moz-selection {
+  background-color: transparent;
+  color: var(--off-white);
+}
 
 .body {
   margin: 0;
@@ -96,7 +112,7 @@ body {
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
 
-  --font-family: Lilex, system-ui, verdana, inter, 'Mona Sans', Fira Code;
+  --font-family: CommitMono, Lilex, system-ui, verdana, inter, 'Mona Sans', Fira Code;
   --font-sans: Lilex, system-ui, verdana, inter, 'Mona Sans', Fira Code;
   --titlebar-height: 30px;
   --traffic-lights-width: 72px;
@@ -110,9 +126,11 @@ body {
   --background-lighter: oklch(0.270 var(--bg-chroma) var(--bg-hue));
   --background-lightest: oklch(0.400 var(--bg-chroma) var(--bg-hue));
 
-  --table-dark: var(--background);
-  --table-light: oklch(0.180 var(--bg-chroma) var(--bg-hue));
+  --table-dark: var(--background-darkest);
+  --table-light: oklch(0.160 var(--bg-chroma) var(--bg-hue));
   --table-outline: var(--background-lightest);
+
+  --off-white: oklch(0.9587 0.0329 105.46);
 }
 
 .dark {

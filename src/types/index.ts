@@ -26,6 +26,29 @@ export interface DraggingArcProps {
   toPos: Coord2D;
 }
 
+export type DirectArrowProps = {
+  key: "direct";
+  midpoint: Coord2D;
+  centringFactor: Coord2D;
+  arrowRadius: number;
+  angle: number;
+}
+
+export type AngularArrowProps = {
+  key: "angular";
+  midpoint: Coord2D;
+  centringFactor: Coord2D;
+  arrowRadius: number;
+  angle: number;
+}
+
+export type LoopArrowProps = {
+  key: "loop";
+  ctxPos: Coord2D;
+}
+
+export type ArrowProps = DirectArrowProps | AngularArrowProps | LoopArrowProps
+
 // backend communicated data
 // requires snake_case for variable names
 
@@ -122,4 +145,9 @@ export type TableRowsProps<T, K extends keyof T> = {
 export type Controls = {
   tolerance: number;
   maxIterations: number;
+}
+
+export type ControlsModuleProps = {
+  settingName: string;
+  description: string;
 }
