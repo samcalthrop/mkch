@@ -1,6 +1,10 @@
 # mk.ch
 > an app for quick & easy construction of markov chains for simulation
 
+## Current Snapshot:
+
+![current snapshot of app](/src/assets/current-snapshot)
+
 ## the plan
 
 - app built with tauri
